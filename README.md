@@ -6,3 +6,4 @@ The tool has the following steps:
 2. Stock taking
 3. Stock reconcilliation
 4. Stock posting
+The tool uses Codeigniter 
