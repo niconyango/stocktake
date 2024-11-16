@@ -60,8 +60,8 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right btn-xs" href="<?php echo base_url(); ?>customexcel"><i class="fad fa-file-excel"></i>&nbsp;Excel</a>
-                            <a class="btn btn-default pull-right btn-xs" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fa fa-print"></i>&nbsp;Print</a>
+                            <a class="btn btn-success pull-right" href="<?php echo base_url(); ?>customexcel"><i class="fad fa-file-excel"></i>&nbsp;Export Excel</a>
+                            <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fa fa-print"></i>&nbsp;Print</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">

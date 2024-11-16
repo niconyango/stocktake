@@ -5,6 +5,7 @@
     </div>
     <!-- /.login-logo -->
     <div class="login-box-body">
+        <img src="<?php echo base_url(); ?>assets/theme/img/pixel_weave.png" style="width:60px; height:60px; display:block; margin: 0 auto;" class="user-image img-circle" alt="User Image" /><br>
       <p class="login-box-msg">Sign in to start your session</p>
       <?php if (!empty($error)) { ?>
         <div class="alert alert-danger"><?php echo  $error; ?></div>
@@ -59,5 +60,3 @@
     });
   </script>
 </body>
-
-</html>

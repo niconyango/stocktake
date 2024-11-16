@@ -114,6 +114,7 @@ class Welcome extends CI_Controller
 		if ($this->session->userdata('logged')) {
 			$data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
 			$data['config'] = $this->Stocktake->storeconfig();
+
 			$data['progress'] = $this->Stocktake->sheetprogress();
 			//$data['department'] = $this->Stocktake->departmentalprogress();
 			$data['title'] = 'Dashboard';
@@ -126,11 +127,18 @@ class Welcome extends CI_Controller
 			redirect('welcome');
 		}
 	}
-	/** Dashboard  */
+	// Dashboard
 	public function sheetsdepartment_status()
 	{
-		$data['department'] = $this->Stocktake->departmentalprogress();
-		echo json_encode($data);
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $data['departments'] = $this->Stocktake->departmentalprogress();
+                echo json_encode($data);
+                break;
+            default:
+                redirect('welcome');
+                break;
+        }
 	}
 	/**Existing system users */
 	public function users()

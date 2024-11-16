@@ -22,8 +22,8 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right btn-xs btn-flat" href="<?php echo base_url() ?>countedexcel"><i class="fa fa-file-excel-o"></i>Excel</a>
-                            <a class="btn btn-default pull-right btn-xs btn-flat" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fa fa-print"></i> Print</a>
+                            <a class="btn btn-success pull-right btn-xs btn-flat" href="<?php echo base_url() ?>countedexcel"><i class="fa fa-file-excel-o"></i> Export Excel</a>
+                            <a class="btn btn-default pull-right btn-xs btn-flat" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fa fa-print"></i> Export PDF</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">
@@ -70,8 +70,6 @@
 </div><!-- /.content-wrapper -->
 <script type="text/javascript">
     $(document).ready(function() {
-
         $("#departments").DataTable({});
-
     })
 </script>

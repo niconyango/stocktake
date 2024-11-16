@@ -36,12 +36,13 @@ class Stocktake extends CI_Model
     /** Departmental progress */
     public function departmentalprogress()
     {
-        $this->db->SELECT('d.`Name` AS department,ROUND(SUM(t.`Quantity`)) AS value ');
+        $this->db->SELECT('d.`Name` AS department,ROUND(SUM(t.`Quantity`*i.`Cost`)) AS value ');
+
         $this->db->JOIN('`item` i', 'i.`ID`=t.`ItemID`');
         $this->db->JOIN('`department` d', 'd.`ID`=i.`DepartmentID`');
         $this->db->JOIN('`stocktake` s', 's.`ID`=t.`StockTakeID`');
         $this->db->WHERE('s.`Status`', 0);
-        $this->db->GROUP_BY('d.`Name`');
+        $this->db->GROUP_BY('d.`ID`');
 
         $query = $this->db->get('`tempsheets` t');
         if ($query->num_rows() > 0) {
@@ -373,7 +374,7 @@ class Stocktake extends CI_Model
     /** Posting stocks process */
     public function post_stocks()
     {
-        /** Updating uncounted SKUs */
+        // Updating uncounted SKUs
         $queryx = $this->db->query("UPDATE `stocktake_entry`e  SET e.`QtyDiff`=IF(e.`OriginalQty`= 0,0,IFNULL(e.`CountedQty`-e.`OriginalQty`,0)), e.`Lastupdated`='" . date('Y-m-d h:i:s') . "' WHERE e.`Status`= 0 AND e.`CountedDate` IS NULL ");
 
         /** Updating stock take in physicalinventoryentry table */
@@ -382,7 +383,6 @@ class Stocktake extends CI_Model
         $physical = $this->db->insert_id();
 
         $query0 = $this->db->query("SELECT s.`ID` as StockTakeID FROM  `stocktake`s WHERE s.`Status`=0 ");
-
         $StockTakeID = $query0->row()->StockTakeID;
 
         /** Updating stock take in physicalinventoryentry table */
@@ -493,7 +493,7 @@ class Stocktake extends CI_Model
         return $query->row();
     }
 
-    /** Getting the counted SKUs records */
+    // Getting the counted SKUs records.
     public function stocks()
     {
         $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
@@ -513,7 +513,7 @@ class Stocktake extends CI_Model
         } else
             return false;
     }
-    /** Uncounted SKUs */
+    // Uncounted SKUs.
     public function uncounted()
     {
         $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
@@ -532,12 +532,11 @@ class Stocktake extends CI_Model
         } else
             return false;
     }
-    /** Case 1: Where a user is quering specifics(Department,category & subcategory) */
+    // Case 1: Where a user is quering specifics(Department,category & subcategory).
     public function counted_stocks($DepartmentID, $CategoryID, $SubCategoryID)
     {
         if (($DepartmentID != 0) && ($CategoryID != 0) && ($SubCategoryID != 0)) {
             $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
-
 
             $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
             $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
@@ -554,7 +553,7 @@ class Stocktake extends CI_Model
             } else
                 return false;
         }
-        /** Case 2: Where the user isn't specific on any subcategory */
+        // Case 2: Where the user isn't specific on any subcategory.
         elseif (($DepartmentID != 0) && ($CategoryID != 0) && ($SubCategoryID == 0)) {
             $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
 

@@ -24,7 +24,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 |
 */
 date_default_timezone_set('Africa/Nairobi');
-$config['base_url'] = 'http://192.168.110.4/stocktake/';
+$config['base_url'] = 'http://localhost/stocktake/';
 
 /*
 |--------------------------------------------------------------------------

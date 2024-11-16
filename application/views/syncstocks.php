@@ -58,8 +58,8 @@
                             </div>
                         <?php } ?>
                         <div class="col-xs-4">
-                            <a class="btn btn-success pull-right btn-xs" href="<?php echo base_url() ?>synchronize"><i class="fal fa-file-excel"></i>&nbsp; Excel</a>
-                            <a class="btn btn-default pull-right btn-xs" style="margin-right: 5px;" target="_blank" href="<?php echo base_url() ?>pdf"><i class="fas fa-file-pdf"></i>&nbsp; Pdf</a>
+                            <a class="btn btn-success pull-right" href="<?php echo base_url() ?>synchronize"><i class="fal fa-file-excel"></i>&nbsp; Export Excel</a>
+                            <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url() ?>pdf"><i class="fas fa-file-pdf"></i>&nbsp; Export PDF</a>
                         </div>
                     </div><!-- /.box-header -->
 
@@ -323,7 +323,6 @@
     });
 
     $(document).ready(function() {
-
         $("body").on('click', '.btn-edit', function(e) {
             var bin = $(this).attr('bin')
             $("#action").val($(this).attr('ID'));
@@ -340,8 +339,7 @@
         //$("#pending_details").DataTable({})
     });
     $('.btn-skus').click(function() {
-        /** alert('Test '+ $(this).attr('entry')) */
-
+        // alert('Test '+ $(this).attr('entry')).
         var id = $(this).attr('user');
         var url = "<?php echo base_url() ?>products";
 
@@ -351,14 +349,11 @@
             url: url,
             success: function(data) {
                 var result = $.parseJSON(data);
-
-
                 var table = "";
                 var i = 1;
 
                 if (result.entries != null) {
                     $.each(result.entries, function(key, value) {
-
                         table += "<tr>";
                         table += "<td>" + i + "</td>";
                         table += "<td>" + value.tDate + "</td>";
@@ -367,10 +362,8 @@
                         table += "<td>" + value.Description + "</td>";
                         table += "<td>" + value.Quantity + "</td>";
                         table += "</tr>";
-
                         i++;
                     })
-
                     console.log(table)
                     $("#pending_details tbody").html(table);
                 } else {

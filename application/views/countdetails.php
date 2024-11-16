@@ -21,11 +21,10 @@
                             <?php
                             if (!empty($info)) {
                                 foreach ($info as $row) {
-
                                     $id = $row->ID;
                             ?>
-                                    <a class="btn btn-success pull-right btn-xs" href="<?php echo base_url(); ?>detailsexcel/<?php echo $id; ?>"><i class="fad fa-file-excel"></i> &nbsp; Excel</a>
-                                    <a class="btn btn-default pull-right btn-xs" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fas fa-file-pdf"></i>&nbsp; Print</a>
+                                    <a class="btn btn-success pull-right" href="<?php echo base_url(); ?>detailsexcel/<?php echo $id; ?>"><i class="fad fa-file-excel"></i> &nbsp; Export Excel</a>
+                                    <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fas fa-file-pdf"></i>&nbsp; Print</a>
                             <?php
                                 }
                             }

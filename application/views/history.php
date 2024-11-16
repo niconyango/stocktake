@@ -57,8 +57,8 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right btn-xs btn-flat" style="border-radius: 5px;" href="<?php echo base_url(); ?>historyexcel"><i class="fad fa-file-excel"></i>&nbsp; Excel</a>
-                            <a class="btn btn-default pull-right btn-xs btn-flat" style="margin-right: 5px;border-radius:5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fal fa-file-pdf"></i>&nbsp; Pdf</a>
+                            <a class="btn btn-success pull-right btn-flat" style="border-radius: 5px;" href="<?php echo base_url(); ?>historyexcel"><i class="fad fa-file-excel"></i>&nbsp; Export Excel</a>
+                            <a class="btn btn-default pull-right btn-flat" style="margin-right: 5px;border-radius:5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">
@@ -134,38 +134,32 @@
         })
     })
     $('#department').change(function() {
-
         $("#category").html("<option value=''>Select Category</option>")
-
         var department = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_categories_department',
+            url: '<?php echo base_url(); ?>get_categories_department',
             data: 'departmentid=' + department,
             success: function(data) {
                 var json = $.parseJSON(data)
                 $.each(json.Category, function(index, value) {
                     var nicholas = '<option value="' + value.ID + '">' + value.Name + '</option>';
-
                     $("#category").append(nicholas)
                 })
             }
         })
     })
     $('#category').change(function() {
-
         $("#subcategory").html("<option value=''>Select SubCategory</option>")
-
         var category = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_subcategories_department',
+            url: '<?php echo base_url(); ?>get_subcategories_department',
             data: 'categoryid=' + category,
             success: function(data) {
                 var json = $.parseJSON(data)
                 $.each(json.SubCategory, function(index, value) {
                     var nicholas = '<option value="' + value.ID + '">' + value.Name + '</option>';
-
                     $("#subcategory").append(nicholas)
                 })
             }

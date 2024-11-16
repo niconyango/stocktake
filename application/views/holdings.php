@@ -62,9 +62,9 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right btn-xs" href="<?php echo base_url(); ?>excel"><i class="fal fa-file-excel"></i>&nbsp;Excel</a>
+                            <a class="btn btn-success pull-right" href="<?php echo base_url(); ?>excel"><i class="fal fa-file-excel"></i>&nbsp; Export Excel</a>
 
-                            <a class="btn btn-default pull-right btn-xs" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fal fa-file-pdf"></i>&nbsp; Pdf</a>
+                            <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">
@@ -142,13 +142,11 @@
 
     })
     $('#department').change(function() {
-
         $("#category").html("<option value='0'>Select Category</option>")
-
         var department = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_categories_department',
+            url: '<?php echo base_url();?>get_categories_department',
             data: 'departmentid=' + department,
             success: function(data) {
                 var json = $.parseJSON(data)
@@ -167,7 +165,7 @@
         var category = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_subcategories_department',
+            url: '<?php echo base_url();?>>get_subcategories_department',
             data: 'categoryid=' + category,
             success: function(data) {
                 var json = $.parseJSON(data)
