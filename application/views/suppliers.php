@@ -7,7 +7,7 @@
             <small>List</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">List</li>
         </ol>
     </section>

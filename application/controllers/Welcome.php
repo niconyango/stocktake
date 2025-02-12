@@ -66,7 +66,6 @@ class Welcome extends CI_Controller
 					'DropLimit' => $result->DropLimit,
 					'CashDrawerNumber' => $result->CashDrawerNumber,
 					'SecurityLevel' => $result->SecurityLevel,
-					'Priviledges' => $result->Priviledges,
 					'EmailAddress' => $result->EmailAddress,
 					'FailedLogonAttempts' => $result->FailedLogonAttempts,
 					'MaxOverShortAmount' => $result->MaxOverShortAmount,

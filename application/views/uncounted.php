@@ -7,7 +7,7 @@
             <small>Report</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Report</li>
         </ol>
     </section>
@@ -21,7 +21,7 @@
                             <!--Start Date text input -->
                             <div class="box-body">
                                 <div class="col-md-12">
-                                    <form role="form" action="<?php echo base_url() ?>uncounted_category" method="post">
+                                    <form role="form" action="<?php echo base_url('uncounted_category'); ?>" method="post">
                                         <div class="row">
                                             <!-- Department  -->
                                             <div class="form-group col-md-4">
@@ -135,9 +135,8 @@
     $(document).ready(function() {
         $('.btn-items').click(function() {
             /** alert('Test '+ $(this).attr('entry')) */
-
             var id = $(this).attr('entry');
-            var url = "<?php echo base_url() ?>product";
+            var url = "<?php echo base_url('product'); ?>";
 
             $.ajax({
                 data: "ItemID=" + id,
@@ -190,7 +189,7 @@
             var department = $(this).val()
             $.ajax({
                 type: 'post',
-                url: 'http://192.168.110.4/stocktake/Welcome/get_categories_department',
+                url: '<?php echo base_url("get_categories_department");?>',
                 data: 'departmentid=' + department,
                 success: function(data) {
                     var json = $.parseJSON(data)
@@ -209,7 +208,7 @@
             var category = $(this).val()
             $.ajax({
                 type: 'post',
-                url: 'http://192.168.110.4/stocktake/Welcome/get_subcategories_department',
+                url: '<?php echo base_url("get_subcategories_department");?>',
                 data: 'categoryid=' + category,
                 success: function(data) {
                     var json = $.parseJSON(data)

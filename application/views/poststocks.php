@@ -7,7 +7,7 @@
             <small>Posting</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fal fa-home-lg"></i>&nbsp; Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fal fa-home-lg"></i>&nbsp; Home</a></li>
             <li class="active">Stock Take</li>
         </ol>
     </section>
@@ -169,9 +169,8 @@
     $(document).ready(function() {
         $('.btn-skus').click(function() {
             /** alert('Test '+ $(this).attr('entry')) */
-
             var id = $(this).attr('user');
-            var url = "<?php echo base_url() ?>products";
+            var url = "<?php echo base_url('products'); ?>";
 
             $.ajax({
                 data: "UserID=" + id,

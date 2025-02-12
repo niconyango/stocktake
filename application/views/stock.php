@@ -7,7 +7,7 @@
             <small>Report</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Report</li>
         </ol>
     </section>
@@ -21,7 +21,7 @@
                             <!--Start Date text input -->
                             <div class="box-body">
                                 <div class="col-md-12">
-                                    <form role="form" action="<?php echo base_url() ?>specific_category" method="post">
+                                    <form role="form" action="<?php echo base_url('specific_category'); ?>" method="post">
                                         <div class="row">
                                             <!-- Department  -->
                                             <div class="form-group col-md-4">
@@ -208,7 +208,7 @@
             /** alert('Test '+ $(this).attr('entry')) */
 
             var id = $(this).attr('entry');
-            var url = "<?php echo base_url() ?>product";
+            var url = "<?php echo base_url('product'); ?>";
 
             $.ajax({
                 data: "ItemID=" + id,

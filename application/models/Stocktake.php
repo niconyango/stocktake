@@ -8,13 +8,8 @@ class Stocktake extends CI_Model
     /** Login details method */
     public function login($data)
     {
-        $query = $this->db->query("SELECT `ID`,`LastUpdated`,`Number`,`StoreID`,`Name`,Pass,`FloorLimit`,`ReturnLimit`,`DropLimit`,`CashDrawerNumber`,`SecurityLevel`,`Priviledges`,`EmailAddress`,`FailedLogonAttempts`,`MaxOverShortAmount`,`MaxOverShortPercent`,`OverShortLimitType`,`Telephone`,`Enabled`,`TimeSchedule`,`LastPasswordChange`,`PassExpires`,`InventoryLocation`,`SalesRepID`,`BinLocation` FROM `cashier`c  WHERE c.`Number` =  '" . $data['Number'] . "'  AND c.`Pass` = PASSWORD('" . $data['Pass'] . "') ");
-
-        if ($query) {
-            return $query->row();   
-        }
-
-        return false;
+        $query = $this->db->query("SELECT `ID`, `LastUpdated`, `Number`, `StoreID`, `Name`, `Pass`, `FloorLimit`, `ReturnLimit`, `DropLimit`,`CashDrawerNumber`, `SecurityLevel`, `EmailAddress`, `FailedLogonAttempts`,`MaxOverShortAmount`, `MaxOverShortPercent`, `OverShortLimitType`, `Telephone`, `Enabled`,`TimeSchedule`, `LastPasswordChange`, `PassExpires`, `InventoryLocation`, `SalesRepID`, `BinLocation` FROM `cashier` WHERE `Number` = ? AND `Pass` = PASSWORD(?)", [$data['Number'], $data['Pass']]);
+        return $query->row() ?: false;
     }
     /** Sheet progress:Dashboard */
     public function sheetprogress()
@@ -336,33 +331,30 @@ class Stocktake extends CI_Model
 
         return false;
     }
-    /** Freezing stocks for stock take method */
+    // Freezing stocks for stock take method
     public function fstocks()
     {
-        /** Checking whether an item is missing in inventorylocationitems */
-        $query0 = $this->db->query("INSERT `inventorylocationitems`(`InventoryLocation`,`ItemDBID`,`Quantity`) SELECT (SELECT c.`StoreID` FROM `configuration`c) AS InventoryLocation,i.`ID` AS ItemDBID,i.`quantity` AS Quantity FROM `item`i WHERE i.`ID` NOT IN (SELECT ItemDBID FROM `inventorylocationitems`l JOIN `configuration`c ON c.`StoreID`=l.`InventoryLocation`)");
-        /** Creating stock take header */
-        $query = $this->db->query("INSERT `stocktake`(`StoreID`,`CountingDate`,`InitiatedByID`,`InitiatedByName`,`Lastupdated`) SELECT c.`StoreID`,NOW() AS CountingDate,'" . $this->session->userdata('ID') . "','" . $this->session->userdata('Name') . "',NOW() AS Lastupdated FROM `configuration`c ");
+        // Efficiently Insert Missing Items into inventorylocationitems
+        $this->db->query("INSERT INTO inventorylocationitems (InventoryLocation, ItemDBID, Quantity) SELECT c.StoreID, i.ID, i.quantity FROM item i JOIN configuration c ON c.StoreID NOT IN (SELECT DISTINCT l.InventoryLocation FROM inventorylocationitems l)");
+        // Insert Stock Take Header (Using Query Bindings for Security)
+        $this->db->query("INSERT INTO stocktake (StoreID, CountingDate, InitiatedByID, InitiatedByName, Lastupdated) SELECT StoreID, NOW(), ?, ?, NOW() FROM configuration", [$this->session->userdata('ID'), $this->session->userdata('Name')]);
 
         $stocktakeid = $this->db->insert_id();
-        /** Inserting all SKUs records in stocktake_entry table */
-        $query1 = $this->db->query("INSERT INTO `stocktake_entry`(`StocktakeID`,`StoreID`,`DepartmentID`,`CategoryID`,`SubCategoryID`,`ItemID`,`ItemLookupCode`,`Description`,`BinLocation`,`tDate`,`OriginalQty`,`Lastupdated`,`Cost`,`Price`) SELECT '$stocktakeid',c.`StoreID`,IFNULL(i.`DepartmentID`,0),IFNULL(i.`CategoryID`,0),IFNULL(i.`SubCategoryID`,0),i.`ID`,i.`ItemLookupCode`,i.`Description`,`BinLocation`,NOW(),l.`Quantity`,NOW() AS Lastupdated,i.`Cost`,i.`Price` FROM `item`i JOIN `inventorylocationitems`l ON l.`ItemDBID`=i.`ID` JOIN `configuration`c ON c.`StoreID` = l.`InventoryLocation` ");
-        if ($query1) {
-            return true;
-        }
+        // Insert Stock Take Entries with Proper Joins & Index Usage
+        $query = $this->db->query("INSERT INTO stocktake_entry (StocktakeID, StoreID, DepartmentID, CategoryID, SubCategoryID, ItemID,ItemLookupCode, Description, BinLocation, tDate, OriginalQty, Lastupdated, Cost, Price) SELECT ?, c.StoreID, COALESCE(i.DepartmentID, 0), COALESCE(i.CategoryID, 0), COALESCE(i.SubCategoryID, 0),i.ID, i.ItemLookupCode, i.Description, l.BinLocation, NOW(), l.Quantity, NOW(), i.Cost, i.Price FROM item i JOIN inventorylocationitems l ON l.ItemDBID = i.ID JOIN configuration c ON c.StoreID = l.InventoryLocation", [$stocktakeid]);
 
-        return false;
+        return $query ? true : false;
     }
     /** Showing the stock sheet that haven't been saved */
     public function pending_tempsheets()
     {
-        $this->db->SELECT("t.`StocktakeID` AS StocktakeID,t.`UserID`,t.`Shelf` AS bin,t.`Quantity`,e.`Cost`,e.`Price`,SUM(t.`Quantity`*e.`Cost`) AS costvalue,t.`CashierName` AS user,SUM(t.`Quantity`*e.`Price`) AS pricevalue");
-        $this->db->JOIN('`stocktake` s', 's.`ID`=t.`StocktakeID`');
-        $this->db->JOIN('`stocktake_entry` e', 'e.`ItemID`=t.`ItemID`');
-        $this->db->WHERE('t.`Status`', 0);
-        $this->db->WHERE('e.`StocktakeID`=t.`StocktakeID`');
-        $this->db->WHERE('s.`Status`', 0);
-        $this->db->GROUP_BY('t.`CashierName`');
+        $this->db->select("t.`StocktakeID` AS StocktakeID,t.`UserID`,t.`Shelf` AS bin,t.`Quantity`,e.`Cost`,e.`Price`,SUM(t.`Quantity`*e.`Cost`) AS costvalue,t.`CashierName` AS user,SUM(t.`Quantity`*e.`Price`) AS pricevalue");
+        $this->db->join('`stocktake` s', 's.`ID`=t.`StocktakeID`');
+        $this->db->join('`stocktake_entry` e', 'e.`ItemID`=t.`ItemID`');
+        $this->db->where('t.`Status`', 0);
+        $this->db->where('e.`StocktakeID`=t.`StocktakeID`');
+        $this->db->where('s.`Status`', 0);
+        $this->db->group_by('t.`CashierName`');
 
         $query = $this->db->get('`tempsheets` t');
 
@@ -371,91 +363,75 @@ class Stocktake extends CI_Model
         } else
             return false;
     }
-    /** Posting stocks process */
+   // posting counted items and reseting all items not counted to 0.
     public function post_stocks()
     {
+        $this->db->trans_start(); // Start Transaction
+        $now = date('Y-m-d H:i:s');
+        // reseting all skus to 0.
+        $query = $this->db->query("update `item`i set i.`quantity`=0");
+        $query = $this->db->query("update `inventorylocationitems`l set l.`Quantity`=0");
         // Updating uncounted SKUs
-        $queryx = $this->db->query("UPDATE `stocktake_entry`e  SET e.`QtyDiff`=IF(e.`OriginalQty`= 0,0,IFNULL(e.`CountedQty`-e.`OriginalQty`,0)), e.`Lastupdated`='" . date('Y-m-d h:i:s') . "' WHERE e.`Status`= 0 AND e.`CountedDate` IS NULL ");
-
-        /** Updating stock take in physicalinventoryentry table */
-        $query4 = $this->db->query("INSERT `physicalinventory`(`InventoryLocation`,`StoreID`,`OpenTime`,`CloseTime`,`Status`,`LastRefresh`,`Description`,`uUser`) SELECT s.`StoreID`,s.`StoreID`,s.`CountingDate`,NOW() AS CloseTime,2 AS Status,NOW() AS LastRefresh,'Stock Take' AS Description,'" . $this->session->userdata('Name') . "' FROM `stocktake`s WHERE s.`Status`=0");
+        $this->db->query("UPDATE `stocktake_entry` e  SET e.`QtyDiff` = IF(e.`OriginalQty` = 0, 0, COALESCE(e.`CountedQty` - e.`OriginalQty`, 0)),e.`Lastupdated` = '$now' WHERE e.`Status` = 0 AND e.`CountedDate` IS NULL");
+        // Insert into physicalinventory
+        $this->db->query("INSERT INTO `physicalinventory` (`InventoryLocation`, `StoreID`, `OpenTime`, `CloseTime`, `Status`, `LastRefresh`, `Description`, `uUser`) SELECT s.`StoreID`, s.`StoreID`, s.`CountingDate`, NOW(), 2, NOW(), 'Stock Take', '" . $this->session->userdata('Name') . "' FROM `stocktake` s  WHERE s.`Status` = 0");
 
         $physical = $this->db->insert_id();
+        // Fetch stock take ID
+        $StockTakeID = $this->db->query("SELECT s.`ID` AS StockTakeID FROM `stocktake` s WHERE s.`Status` = 0")->row()->StockTakeID;
+        // Insert into physicalinventoryentry
+        $this->db->query("INSERT INTO `physicalinventoryentry` (`StoreID`, `PhysicalInventoryID`, `ReasonCodeID`, `CountTime`, `ItemID`, `BinLocation`, `Price`, `Cost`, `QuantityCounted`, `QuantityAdjusted`, `QuantityRefreshed`)  SELECT e.`StoreID`, '$physical', 97, e.`CountedDate`, e.`ItemID`, e.`BinLocation`, e.`Price`, e.`Cost`, e.`CountedQty`, e.`QtyDiff`, e.`CountedQty` FROM `stocktake_entry` e WHERE e.`Status` = 0 AND e.`StocktakeID` = '$StockTakeID' AND e.`QtyDiff` != 0");
+        // Update stock quantities in the item table
+        $this->db->query("UPDATE `item` i JOIN `stocktake_entry` e ON e.`ItemID` = i.`ID` SET i.`quantity` = (i.`quantity` + e.`QtyDiff`) WHERE e.`Status` = 0 AND e.`CountedDate` IS NOT NULL AND e.`CountedQty` != 0 AND e.`StocktakeID` = '$StockTakeID'");
+        // Update items that were not counted
+        $this->db->query("UPDATE `item` i JOIN `stocktake_entry` e ON e.`ItemID` = i.`ID` SET i.`quantity` = e.`CountedQty` WHERE e.`Status` = 0 AND e.`CountedDate` IS NULL AND e.`CountedQty` = 0 AND e.`StocktakeID` = '$StockTakeID'");
+        // Update stock quantities in inventorylocationitems table
+        $this->db->query("UPDATE `inventorylocationitems` l JOIN `item` i ON i.`ID` = l.`ItemDBID` SET l.`Quantity` = i.`quantity` WHERE l.`InventoryLocation` IN (SELECT c.`StoreID` FROM `configuration` c)");
+        // Close the stock take
+        $this->db->query("UPDATE `stocktake` s SET s.`Status` = 1,s.`Committed` = '" . $this->session->userdata('ID') . "',s.`CommittedName` = '" . $this->session->userdata('Name') . "',s.`Lastupdated` = NOW(),s.`DateCommitted` = NOW()");
+        // Close stock take details
+        $this->db->query("UPDATE `stocktake_entry` e SET e.`Status` = 1, e.`Lastupdated` = NOW(), e.`CountedDate` = NOW()");
+        // Update stock take sheets with closed status
+        $this->db->query("UPDATE `stocksheets` s SET s.`Status` = 1, s.`cDate` = NOW()");
+        // Update physicalinventory code with formatted ID
+        $this->db->query("UPDATE `physicalinventory` p SET p.`Code` = LPAD('$physical', 6, '0')");
 
-        $query0 = $this->db->query("SELECT s.`ID` as StockTakeID FROM  `stocktake`s WHERE s.`Status`=0 ");
-        $StockTakeID = $query0->row()->StockTakeID;
+        $this->db->trans_complete(); // Commit or Rollback
+        return $this->db->trans_status();
 
-        /** Updating stock take in physicalinventoryentry table */
-        $query5 = $this->db->query("INSERT `physicalinventoryentry`(`StoreID`,`PhysicalInventoryID`,`ReasonCodeID`,`CountTime`,`ItemID`,`BinLocation`,`Price`,`Cost`,`QuantityCounted`,`QuantityAdjusted`,`QuantityRefreshed`) SELECT e.`StoreID`,'$physical',97 AS ReasonCodeID,`CountedDate`,e.`ItemID`,e.`BinLocation`,e.`Price`,e.`Cost`,e.`CountedQty` AS QuantityCounted,(e.`QtyDiff`) AS QuantityAdjusted,e.`CountedQty` AS QuantityRefreshed FROM `stocktake_entry`e WHERE e.`Status`= 0 AND e.`StocktakeID`='$StockTakeID'
-        AND e.`QtyDiff`<>0 ");
-
-        /** Updating stock quantities in the item table */
-        $query6 = $this->db->query("UPDATE `item`i JOIN `stocktake_entry`e  ON e.`ItemID`=i.`ID` SET i.`quantity`= (i.`quantity`+e.`QtyDiff`) WHERE e.`Status`=0 AND e.`CountedDate` IS NOT NULL AND e.`CountedQty`<>0 AND e.`StocktakeID`=$StockTakeID");
-
-        /** Updating items that were not counted */
-        $query7 = $this->db->query("UPDATE `item`i JOIN `stocktake_entry`e  ON e.`ItemID`=i.`ID` SET i.`quantity`= e.`CountedQty` WHERE e.`Status`=0 AND e.`CountedDate` IS NULL AND e.`CountedQty`=0 AND e.`StocktakeID`='$StockTakeID'");
-
-        /** Updating stock quantities in the inventorylocation item table */
-        $query8 = $this->db->query("UPDATE `inventorylocationitems`l JOIN `item`i ON i.`ID`=l.`ItemDBID` SET l.`Quantity`= i.`quantity` WHERE l.`InventoryLocation` IN (SELECT c.`StoreID` FROM `configuration`c) AND i.`ID`=l.`ItemDBID`");
-
-        /** Closing the stock take */
-        $query9 = $this->db->query("UPDATE `stocktake`s SET s.`Status`=1,s.`Committed`='" . $this->session->userdata('ID') . "',s.`CommittedName`='" . $this->session->userdata('Name') . "',s.`Lastupdated`=NOW(),s.`DateCommitted`=NOW()");
-
-        /** Closing the stock take details */
-        $query10 = $this->db->query("UPDATE `stocktake_entry`e SET e.`Status` = 1,e.`Lastupdated`= NOW(),e.`CountedDate` = NOW()");
-
-        /** Updating  stock take sheets with closed status */
-        $query11 = $this->db->query("UPDATE `stocksheets`s SET s.`Status` = 1,s.`cDate`= NOW()");
-
-        /** Updating the right physicalinventory code */
-        $query12 = $this->db->query("UPDATE `physicalinventory`p SET p.`Code`=CASE WHEN LENGTH($physical)=1 THEN CONCAT('00000','',$physical)  WHEN LENGTH($physical)=2 THEN CONCAT('0000','',$physical)  WHEN LENGTH($physical)=3 THEN CONCAT('000','',$physical) WHEN LENGTH($physical)=4 THEN CONCAT('00','',$physical) WHEN LENGTH($physical)=5 THEN CONCAT('0','',$physical) ELSE $physical END");
-
-
-        if ($query11) {
-            return true;
-        }
-
-        return false;
     }
 
-    /** Posting stocks process */
+    // Posting only the counted items leaving uncounted as they were.
     public function post_counted()
     {
-        /** Updating stock take in physicalinventoryentry table */
-        $query4 = $this->db->query("INSERT `physicalinventory`(`InventoryLocation`,`StoreID`,`OpenTime`,`CloseTime`,`Status`,`LastRefresh`,`Description`,`uUser`) SELECT s.`StoreID`,s.`StoreID`,s.`CountingDate`,NOW() AS CloseTime,2 AS Status,NOW() AS LastRefresh,'Stock Take' AS Description,'" . $this->session->userdata('Name') . "' FROM `stocktake`s WHERE s.`Status`=0");
-
-        $physical = $this->db->insert_id();
-
-        /** Picking the stock take record */
-        $query0 = $this->db->query("SELECT s.`ID` as StockTakeID FROM  `stocktake`s WHERE s.`Status`=0 ");
-        $StockTakeID = $query0->row()->StockTakeID;
-
-        /** Updating stock take in physicalinventoryentry table */
-        $query5 = $this->db->query("INSERT `physicalinventoryentry`(`StoreID`,`PhysicalInventoryID`,`ReasonCodeID`,`CountTime`,`ItemID`,`BinLocation`,`Price`,`Cost`,`QuantityCounted`,`QuantityAdjusted`,`QuantityRefreshed`) SELECT e.`StoreID`,'$physical',97 AS ReasonCodeID,`CountedDate`,e.`ItemID`,e.`BinLocation`,e.`Price`,e.`Cost`,e.`CountedQty` AS QuantityCounted,(e.`QtyDiff`) AS QuantityAdjusted,e.`CountedQty` AS QuantityRefreshed FROM `stocktake_entry`e WHERE e.`Status`= 0 AND e.`StocktakeID`='$StockTakeID' AND e.`QtyDiff`<>0 AND e.`CountedDate` IS NOT NULL");
-
-        /** Updating stock quantities in the item table */
-        $query6 = $this->db->query("UPDATE `item`i JOIN `stocktake_entry`e  ON e.`ItemID`=i.`ID` SET i.`quantity`= (i.`quantity`+e.`QtyDiff`) WHERE e.`Status`=0 AND e.`CountedDate` IS NOT NULL AND e.`StocktakeID`=$StockTakeID");
-
-        /** Updating stock quantities in the inventorylocation item table */
-        $query8 = $this->db->query("UPDATE `inventorylocationitems`l JOIN `item`i ON i.`ID`=l.`ItemDBID` SET l.`Quantity`= i.`quantity` WHERE l.`InventoryLocation` IN (SELECT c.`StoreID` FROM `configuration`c) AND i.`ID`=l.`ItemDBID`");
-
-        /** Closing the stock take */
-        $query9 = $this->db->query("UPDATE `stocktake`s SET s.`Status`=1,s.`Committed`='" . $this->session->userdata('ID') . "',s.`CommittedName`='" . $this->session->userdata('Name') . "',s.`Lastupdated`=NOW(),s.`DateCommitted`=NOW() WHERE s.`ID`=$StockTakeID");
-
-        /** Closing the stock take details */
-        $query10 = $this->db->query("UPDATE `stocktake_entry`e SET e.`Status` = 1,e.`Lastupdated`= NOW(),e.`CountedDate` = NOW() WHERE e.`StocktakeID`=$StockTakeID");
-
-        /** Updating  stock take sheets with closed status */
-        $query11 = $this->db->query("UPDATE `stocksheets`s SET s.`Status` = 1,s.`cDate`= NOW() WHERE s.`StocktakeID`=$StockTakeID");
-
-        /** Updating the right physicalinventory code */
-        $query12 = $this->db->query("UPDATE `physicalinventory`p SET p.`Code`=CASE WHEN LENGTH($physical)=1 THEN CONCAT('00000','',$physical) WHEN LENGTH($physical)=2 THEN CONCAT('0000','',$physical) WHEN LENGTH($physical)=3 THEN CONCAT('000','',$physical) WHEN LENGTH($physical)=4 THEN CONCAT('00','',$physical)  WHEN LENGTH($physical)=5 THEN CONCAT('0','',$physical) ELSE $physical END");
-
-        if ($query11) {
-            return true;
+        // Start a transaction to ensure data consistency
+        $this->db->trans_start();
+        // Insert stock take into physicalinventory table
+        $this->db->query("INSERT INTO physicalinventory (InventoryLocation, StoreID, OpenTime, CloseTime, Status, LastRefresh, Description, uUser) SELECT s.StoreID, s.StoreID, s.CountingDate, NOW(), 2, NOW(), 'Stock Take', ? FROM stocktake s WHERE s.Status = 0", [$this->session->userdata('Name')]);
+        $physical = $this->db->insert_id(); // Get last inserted ID
+        // Pick the stock take record
+        $StockTakeID = $this->db->query("SELECT ID FROM stocktake WHERE Status = 0 LIMIT 1")->row()->ID ?? null;
+        if (!$StockTakeID) {
+            $this->db->trans_rollback();
+            return false;
         }
-
-        return false;
+        // Insert into physicalinventoryentry
+        $this->db->query("INSERT INTO physicalinventoryentry (StoreID, PhysicalInventoryID, ReasonCodeID, CountTime, ItemID, BinLocation, Price, Cost, QuantityCounted, QuantityAdjusted, QuantityRefreshed) SELECT e.StoreID, ?, 97, e.CountedDate, e.ItemID, e.BinLocation, e.Price, e.Cost, e.CountedQty, e.QtyDiff, e.CountedQty FROM stocktake_entry e WHERE e.Status = 0 AND e.StocktakeID = ? AND e.QtyDiff != 0 AND e.CountedDate IS NOT NULL", [$physical, $StockTakeID]);
+        // Update item stock quantities
+        $this->db->query("UPDATE item i JOIN stocktake_entry e ON e.ItemID = i.ID SET i.quantity = i.quantity + e.QtyDiff WHERE e.Status = 0 AND e.CountedDate IS NOT NULL AND e.StocktakeID = ?", [$StockTakeID]);
+        // Update inventory location items
+        $this->db->query("UPDATE inventorylocationitems l JOIN item i ON i.ID = l.ItemDBID SET l.Quantity = i.quantity WHERE l.InventoryLocation IN (SELECT StoreID FROM configuration)");
+        // Close the stock take
+        $this->db->query("UPDATE stocktake SET Status = 1, Committed = ?, CommittedName = ?, Lastupdated = NOW(), DateCommitted = NOW() WHERE ID = ?", [$this->session->userdata('ID'), $this->session->userdata('Name'), $StockTakeID]);
+        // Close stock take details
+        $this->db->query("UPDATE stocktake_entry SET Status = 1, Lastupdated = NOW(), CountedDate = NOW() WHERE StocktakeID = ?", [$StockTakeID]);
+        // Update stock take sheets
+        $this->db->query("UPDATE stocksheets SET Status = 1, cDate = NOW() WHERE StocktakeID = ?", [$StockTakeID]);
+        // Update physicalinventory code formatting
+        $this->db->query("UPDATE physicalinventory SET Code = LPAD(?, 6, '0') WHERE ID = ?", [$physical, $physical]);
+        // Complete transaction
+        $this->db->trans_complete();
+        return $this->db->trans_status();
     }
 
     /** Specific sheet details */
@@ -518,10 +494,10 @@ class Stocktake extends CI_Model
     {
         $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
 
-        $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-        $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-        $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-        $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
+        $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'left');
+        $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'left');
+        $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'left');
+        $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'left');
         $this->db->WHERE('s.`CountedQty`', 0);
         $this->db->WHERE('s.Status', 0);
         $this->db->LIMIT('1000');
@@ -535,153 +511,55 @@ class Stocktake extends CI_Model
     // Case 1: Where a user is quering specifics(Department,category & subcategory).
     public function counted_stocks($DepartmentID, $CategoryID, $SubCategoryID)
     {
-        if (($DepartmentID != 0) && ($CategoryID != 0) && ($SubCategoryID != 0)) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->WHERE('d.`ID`', $DepartmentID);
-            $this->db->WHERE('c.`ID`', $CategoryID);
-            $this->db->WHERE('e.`ID`', $SubCategoryID);
-            $this->db->WHERE('s.`CountedQty`>', 0);
-            $this->db->WHERE('s.Status', 0);
-
-            $query = $this->db->get('stocktake_entry s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
+        $this->db->select('d.Name AS department,c.Name AS category,e.Name AS subcategory,s.ItemID AS ItemID,s.ItemLookupCode AS Code,s.Description AS description,s.Cost AS Cost,s.OriginalQty AS OriginalQty,s.CountedQty AS CountedQty,DATE(s.CountedDate) AS CountedDate');
+        $this->db->from('stocktake_entry s');
+        $this->db->join('department d', 'd.ID = s.DepartmentID', 'LEFT');
+        $this->db->join('category c', 'c.ID = s.CategoryID', 'LEFT');
+        $this->db->join('subcategory e', 'e.ID = s.SubCategoryID', 'LEFT');
+        // Apply filtering conditions dynamically
+        if ($DepartmentID != 0) {
+            $this->db->where('d.ID', $DepartmentID);
         }
-        // Case 2: Where the user isn't specific on any subcategory.
-        elseif (($DepartmentID != 0) && ($CategoryID != 0) && ($SubCategoryID == 0)) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->WHERE('d.`ID`', $DepartmentID);
-            $this->db->WHERE('c.`ID`', $CategoryID);
-            $this->db->WHERE('s.`CountedQty`>', 0);
-            $this->db->WHERE('s.Status', 0);
-
-            $query = $this->db->get('stocktake_entry s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
+        if ($CategoryID != 0) {
+            $this->db->where('c.ID', $CategoryID);
         }
-
-        /** Case 3: Where a user is quering a specific Department */
-        elseif (($DepartmentID != 0) && ($CategoryID == 0) && ($SubCategoryID == 0)) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->WHERE('d.`ID`', $DepartmentID);
-            $this->db->WHERE('s.`CountedQty`>', 0);
-            $this->db->WHERE('s.Status', 0);
-
-            $query = $this->db->get('stocktake_entry s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
+        if ($SubCategoryID != 0) {
+            $this->db->where('e.ID', $SubCategoryID);
         }
+        // Common conditions
+        $this->db->where('s.CountedQty >', 0);
+        $this->db->where('s.Status', 0);
+        // Execute query
+        $query = $this->db->get();
+        // Return results or false if empty
+        return ($query->num_rows() > 0) ? $query->result() : false;
 
-        /** Case 4: Where a user is quering all stocks(:items) */
-        elseif (($DepartmentID == 0) && ($CategoryID == 0) && ($SubCategoryID == 0)) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->WHERE('s.`CountedQty`>', 0);
-            $this->db->WHERE('s.Status', 0);
-
-            $query = $this->db->get('stocktake_entry s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
-        }
     }
     /** Uncounted stocks category report */
     public function uncounted_stocks($DepartmentID, $CategoryID, $SubCategoryID)
     {
-        if ($DepartmentID != 0 && $CategoryID != 0 && $SubCategoryID != 0) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
+        $this->db->select('d.Name AS department,c.Name AS category,e.Name AS subcategory,s.ItemID AS ItemID,s.ItemLookupCode AS Code,s.Description AS description,IFNULL(s.Cost, 0) AS Cost,IFNULL(s.Price, 0) AS Price,IFNULL(s.OriginalQty, 0) AS OriginalQty,s.CountedQty AS CountedQty,DATE(s.CountedDate) AS CountedDate,a.Alias');
 
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
-            $this->db->WHERE('s.`DepartmentID`', $DepartmentID);
-            $this->db->WHERE('s.`CategoryID`', $CategoryID);
-            $this->db->WHERE('s.`SubCategoryID`', $SubCategoryID);
-            $this->db->WHERE('s.`CountedQty`', 0);
-            $this->db->WHERE('s.Status', 0);
-            $this->db->GROUP_BY('s.`ItemID`');
+        $this->db->from('stocktake_entry s');
+        $this->db->join('department d', 'd.ID = s.DepartmentID', 'LEFT');
+        $this->db->join('category c', 'c.ID = s.CategoryID', 'LEFT');
+        $this->db->join('subcategory e', 'e.ID = s.SubCategoryID', 'LEFT');
+        $this->db->join('alias a', 'a.ItemID = s.ItemID', 'LEFT');
+        // Dynamically Apply Filters
+        $filters = [];
+        if ($DepartmentID != 0) $filters['s.DepartmentID'] = $DepartmentID;
+        if ($CategoryID != 0) $filters['s.CategoryID'] = $CategoryID;
+        if ($SubCategoryID != 0) $filters['s.SubCategoryID'] = $SubCategoryID;
 
-            $query = $this->db->get('`stocktake_entry` s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
-        } elseif ($DepartmentID != 0 && $CategoryID != 0 && $SubCategoryID == 0) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
+        $this->db->where($filters);
+        // Common Filters
+        $this->db->where('s.CountedQty', 0);
+        $this->db->where('s.Status', 0);
+        $this->db->group_by('s.ItemID');
+        // Execute Query
+        $query = $this->db->get();
+        return ($query->num_rows() > 0) ? $query->result() : false;
 
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
-            $this->db->WHERE('s.`DepartmentID`', $DepartmentID);
-            $this->db->WHERE('s.`CategoryID`', $CategoryID);
-            $this->db->WHERE('s.`CountedQty`', 0);
-            $this->db->WHERE('s.Status', 0);
-            $this->db->GROUP_BY('s.`ItemID`');
-
-            $query = $this->db->get('`stocktake_entry` s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
-        } elseif ($DepartmentID != 0 && $CategoryID == 0 && $SubCategoryID == 0) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
-            $this->db->WHERE('s.`DepartmentID`', $DepartmentID);
-            $this->db->WHERE('s.`CountedQty`', 0);
-            $this->db->WHERE('s.Status', 0);
-            $this->db->GROUP_BY('s.`ItemID`');
-
-            $query = $this->db->get('`stocktake_entry` s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
-        } elseif ($DepartmentID == 0 && $CategoryID == 0 && $SubCategoryID == 0) {
-            $this->db->SELECT('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
-
-            $this->db->JOIN('department d', 'd.`ID`=s.`DepartmentID`', 'LEFT');
-            $this->db->JOIN('category c', 'c.`ID`=s.`CategoryID`', 'LEFT');
-            $this->db->JOIN('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'LEFT');
-            $this->db->JOIN('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
-            $this->db->WHERE('s.`CountedQty`', 0);
-            $this->db->WHERE('s.Status', 0);
-            $this->db->GROUP_BY('s.`ItemID`');
-
-
-            $query = $this->db->get('`stocktake_entry` s');
-            if ($query->num_rows() > 0) {
-                return $query->result();
-            } else
-                return false;
-        }
     }
     /** Current stock list */
     public function holdings()
@@ -814,78 +692,82 @@ class Stocktake extends CI_Model
     /** Synchronise stock take details */
     public function sync_stocks()
     {
-        $queryx = $this->db->query("SELECT COUNT(t.`ID`) AS left_entries FROM `tempsheets` t JOIN `stocktake` s ON s.`ID`=t.`StocktakeID` WHERE t.`Status`=0 AND s.`Status`=0");
-
-        $left_entries =  $queryx->row()->left_entries;
-
+        $this->db->trans_start(); // Start transaction
+        // Get count of remaining entries in tempsheets
+        $left_entries = $this->db->select('COUNT(t.ID) AS left_entries')
+            ->from('tempsheets t')
+            ->join('stocktake s', 's.ID = t.StocktakeID')
+            ->where('t.Status', 0)
+            ->where('s.Status', 0)
+            ->get()
+            ->row()
+            ->left_entries;
         if ($left_entries == 0) {
-            /** Getting the active stocktake ID */
-            $query = $this->db->query("SELECT s.`ID` AS stocktakeid,s.`CountingDate` AS CountingDate FROM `stocktake`s WHERE s.`Status`=0");
-            /** Picking ID to be used */
-            foreach ($query->result_array() as $row) {
-                $stocktakeid = $row['stocktakeid'];
-                $CountingDate = $row['CountingDate'];
+            // Fetch active stocktake ID and counting date
+            $query = $this->db->select('ID AS stocktakeid, CountingDate')
+                ->where('Status', 0)
+                ->get('stocktake');
+
+            if ($query->num_rows() == 0) {
+                return false; // No active stocktake found
             }
-            /** $stocktakeid = $query0->row()->stocktakeid;*/
+            $row = $query->row();
+            $stocktakeid = $row->stocktakeid;
+            $CountingDate = $row->CountingDate;
+            // Delete stocktake_entry records before syncing
+            $this->db->where('StocktakeID', $stocktakeid)->delete('stocktake_entry');
+            // Insert all missing SKU records in stocktake_entry
+            $this->db->query("INSERT INTO stocktake_entry (StocktakeID, StoreID, DepartmentID, CategoryID, SubCategoryID, ItemID, ItemLookupCode, Description, BinLocation, tDate, OriginalQty, Lastupdated, Cost, Price) SELECT ?, c.StoreID, IFNULL(i.DepartmentID, 0), IFNULL(i.CategoryID, 0), IFNULL(i.SubCategoryID, 0), i.ID, i.ItemLookupCode, i.Description, BinLocation, ?, l.Quantity, NOW(), i.Cost, i.Price FROM item i JOIN inventorylocationitems l ON l.ItemDBID = i.ID JOIN configuration c ON c.StoreID = l.InventoryLocation", [$stocktakeid, $CountingDate]);
+            // Clear stocksheets_complete before syncing
+            $this->db->query("DELETE FROM stockshets_complete");
+            // Insert aggregated stocktake records into stocksheets_complete
+            $this->db->query("INSERT INTO stockshets_complete (StocktakeID, ItemID, Quantity, Status) SELECT e.StocktakeID, e.ItemID, IFNULL(SUM(e.Quantity), 0), e.Status FROM stocksheets e WHERE e.Status = 0 GROUP BY e.ItemID ORDER BY e.ItemID");
 
-            /**Deleting the stocktake_entry records before synching */
-            $query0 = $this->db->query("DELETE e FROM  `stocktake_entry`e WHERE e.`StocktakeID`= $stocktakeid");
-
-            /** Inserting all SKUs records in stocktake_entry table: (This is to take care of all the SKUs that may have been left out during the initial stock freeze) */
-            $query1 = $this->db->query("INSERT INTO `stocktake_entry`(`StocktakeID`,`StoreID`,`DepartmentID`,`CategoryID`,`SubCategoryID`,`ItemID`,`ItemLookupCode`,`Description`,`BinLocation`,`tDate`,`OriginalQty`,`Lastupdated`,`Cost`,`Price`) SELECT '$stocktakeid',c.`StoreID`,IFNULL(i.`DepartmentID`,0),IFNULL(i.`CategoryID`,0),IFNULL(i.`SubCategoryID`,0),i.`ID`,i.`ItemLookupCode`,i.`Description`,`BinLocation`,'$CountingDate',l.`Quantity`,NOW() AS Lastupdated,i.`Cost`,i.`Price` FROM `item`i JOIN `inventorylocationitems`l ON l.`ItemDBID`=i.`ID` JOIN `configuration`c ON c.`StoreID` = l.`InventoryLocation` ");
-
-            /** Clearing stockshets_complete before synching the sheets */
-            $query2 = $this->db->query("TRUNCATE TABLE `stockshets_complete`");
-
-            /** Pushing stocktake records to a temporary database */
-            $query3 = $this->db->query("INSERT `stockshets_complete`(`StocktakeID`,`ItemID`,`Quantity`,`Status`) SELECT e.`StocktakeID`,e.`ItemID`,IFNULL(SUM(e.`Quantity`),0) AS Quantity,e.`Status` FROM `stocksheets`e WHERE  e.`Status`=0 GROUP BY e.`ItemID` ORDER BY e.`ItemID`;");
-
-            /** Updating counts to the stocktake_entry table */
-            $query4 = $this->db->query("UPDATE `stocktake_entry`s JOIN  `stockshets_complete`c ON c.`ItemID`=s.`ItemID` SET s.`CountedQty`=c.`Quantity`,s.`Lastupdated`='" . date('Y-m-d h:i:s') . "',s.`CountedDate`='" . date('Y-m-d h:i:s') . "' WHERE s.`Status`= 0 AND c.`ItemID`=s.`ItemID` AND s.`ItemID`IN (SELECT s.`ItemID` FROM `stocksheets`s)");
-
-            $query5 = $this->db->query("UPDATE `stocktake_entry`s  SET s.`QtyDiff`=IFNULL(s.`CountedQty`-s.`OriginalQty`,0),s.`Lastupdated`='" . date('Y-m-d h:i:s') . "' WHERE s.`Status`= 0 AND s.`CountedDate` IS NOT NULL");
-
-            $query6 = $this->db->query("UPDATE `stocksheets` s SET s.`Synched`=1 WHERE s.`StocktakeID`=$stocktakeid");
-
-            if ($query1) {
-                return true;
-            }
-
-            return false;
+            // Update counts in stocktake_entry
+            $this->db->query("UPDATE stocktake_entry s JOIN stockshets_complete c ON c.ItemID = s.ItemID SET s.CountedQty = c.Quantity,s.Lastupdated = NOW(), s.CountedDate = NOW() WHERE s.Status = 0 AND s.ItemID IN (SELECT DISTINCT ItemID FROM stocksheets)");
+            // Update quantity difference in stocktake_entry
+            $this->db->query("UPDATE stocktake_entry SET QtyDiff = IFNULL(CountedQty - OriginalQty, 0),Lastupdated = NOW() WHERE Status = 0 AND CountedDate IS NOT NULL");
+            // Mark stocksheets as synced
+            $this->db->where('StocktakeID', $stocktakeid)
+                ->set('Synched', 1)
+                ->update('stocksheets');
+            $this->db->trans_complete(); // Commit transaction
+            return $this->db->trans_status(); // Return true if all queries succeeded
         } else {
-            return 9;
+            return 9; // Return error code if entries exist
         }
+
     }
     /** Un-doing stock take that has been initiated */
     public function undofreeze()
     {
-        $query0 = $this->db->query("SELECT ID AS stocktakeid FROM `stocktake`s WHERE s.`Status`=0");
-        /** Picking ID to be deleted(:to undo) */
-        $stocktakeid = $query0->row()->stocktakeid;
-        $query = $this->db->query("DELETE s FROM  `stocktake`s WHERE s.`ID`='$stocktakeid'");
+        $this->db->trans_start(); // Start transaction
+        // Securely fetch stocktake ID
+        $query0 = $this->db->select('ID AS stocktakeid')
+            ->where('Status', 0)
+            ->get('stocktake');
 
-        /** Deleting stocktake entry */
-        $querye = $this->db->query("SELECT MIN(e.`ID`) AS min_entry FROM `stocktake_entry`e WHERE e.`StocktakeID`='$stocktakeid'");
-        $min_entry = $querye->row()->min_entry;
-        $query1 = $this->db->query("DELETE e FROM `stocktake_entry`e WHERE e.`Status`= 0 AND e.`StocktakeID`='$stocktakeid' ");
-        /** Deleting sheets */
-        $query2 = $this->db->query("DELETE s FROM `stocksheets`s WHERE s.`StocktakeID`='$stocktakeid' ");
-        /** Deleting temporary sheets */
-        $query3 = $this->db->query("DELETE t FROM `tempsheets`t WHERE t.`StocktakeID`='$stocktakeid' ");
-
-        /** Reseting stocktake table auto_increnment ID */
-        $query4 = $this->db->query("ALTER TABLE `stocktake` AUTO_INCREMENT = $stocktakeid");
-        $query5 = $this->db->query("OPTIMIZE TABLE `stocktake`");
-
-        /** Reseting stocktake_entry auto_increment ID */
-        $query6 = $this->db->query("ALTER TABLE `stocktake_entry` AUTO_INCREMENT = $min_entry");
-        $quer7 = $this->db->query("OPTIMIZE TABLE `stocktake_entry`");
-
-        if ($query3) {
-            return true;
+        if ($query0->num_rows() === 0) {
+            return false; // No stocktake found to delete
         }
+        $stocktakeid = $query0->row()->stocktakeid;
+        // Securely fetch min_entry ID for stocktake_entry
+        $querye = $this->db->select_min('ID', 'min_entry')
+            ->where('StocktakeID', $stocktakeid)
+            ->get('stocktake_entry');
+        $min_entry = $querye->num_rows() > 0 ? $querye->row()->min_entry : 1; // Default to 1 if no entries exist
+        // Batch Deletions with Safe Bindings
+        $this->db->where('ID', $stocktakeid)->delete('stocktake');
+        $this->db->where('StocktakeID', $stocktakeid)->where('Status', 0)->delete('stocktake_entry');
+        $this->db->where('StocktakeID', $stocktakeid)->delete('stocksheets');
+        $this->db->where('StocktakeID', $stocktakeid)->delete('tempsheets');
+        // Reset Auto Increment (Safe Execution)
+        $this->db->query("ALTER TABLE stocktake AUTO_INCREMENT = ?", [$stocktakeid]);
+        $this->db->query("ALTER TABLE stocktake_entry AUTO_INCREMENT = ?", [$min_entry]);
+        $this->db->trans_complete(); // Commit or rollback transaction
 
-        return false;
+        return $this->db->trans_status();
+
     }
     /** Updating tempsheet entry details  */
     public function updatedetail()
@@ -923,93 +805,88 @@ class Stocktake extends CI_Model
     /** Feeding stock take data */
     public function stock_take()
     {
-        $id = $this->input->post('action');
+        $this->db->trans_start(); // Start transaction
+        $id = (int) $this->input->post('action'); // Typecast for security
+        $data = [
+            'ItemLookupCode' => $this->input->post('item_code', true),
+            'Quantity' => (int) $this->input->post('quantity'),
+            'tTime' => date('Y-m-d H:i:s'),
+            'UserID' => (int) $this->session->userdata('ID'),
+            'CashierName' => ucwords($this->session->userdata('Name')),
+            'Shelf' => strtoupper($this->input->post('bin', true)),
+            'Reasoncode' => (int) $this->input->post('reasoncode')
+        ];
+        // Ensure Shelf is valid
+        if (empty($data['Shelf']) || $data['Shelf'] === 'NULL' || $data['Shelf'] === '0') {
+            return 8; // Invalid bin/shelf
+        }
+        // Check if item exists in `item` or `alias` tables
+        $query = $this->db->query("SELECT ID FROM item WHERE ItemLookupCode = ? UNION SELECT ItemID FROM alias WHERE Alias = ? LIMIT 1",
+            [$data['ItemLookupCode'], $data['ItemLookupCode']]
+        );
+        if ($query->num_rows() === 0) {
+            return 3; // Item does not exist
+        }
+        if ($id > 0) {
+            // Update existing tempsheets entry
+            $this->db->where('ID', $id);
+            $this->db->update('tempsheets', $data);
 
-        $data['ItemLookupCode'] = $this->input->post('item_code');
-        $data['Quantity'] = $this->input->post('quantity');
-        $data['tTime'] = date('Y-m-d H:i:s');
-        $data['UserID'] = $this->session->userdata('ID');
-        $data['CashierName'] = ucwords($this->session->userdata('Name'));
-        $data['Shelf'] = strtoupper($this->input->post('bin'));
-        $data['Reasoncode'] = $this->input->post('reasoncode');
-
-        /** $query = $this->db->get_where('item', array('ItemLookupCode' => $data['ItemLookupCode'])); */
-
-        /** Checking the existence of the code in the item master list */
-        $query = $this->db->query("SELECT i.`ID` FROM  `item`i  WHERE i.`ItemLookupCode`= '" . $data['ItemLookupCode'] . "' UNION SELECT a.`ItemID` FROM `alias` a WHERE a.`Alias`= '" . $data['ItemLookupCode'] . "' ");
-
-        if ($query->num_rows() == 0) {
-            /** If the code entered is missing in the master list */
-            return 3;
+            if ($this->db->affected_rows() > 0) {
+                $this->tempsheet_update($id, $data['ItemLookupCode']);
+                return 2; // Successfully updated
+            }
         } else {
-            if ($id > 0) {
-                $this->db->WHERE('ID', $id);
+            // Check user's pending sheet count
+            $entries = $this->db->query("SELECT COUNT(s.ID) AS entries FROM tempsheets s JOIN stocktake t ON t.ID = s.StocktakeID WHERE s.UserID = ? AND s.CashierName = ? AND s.Status = 0 AND t.Status = 0",[$data['UserID'], $data['CashierName']])->row()->entries ?? 0;
 
-                $query = $this->db->UPDATE('tempsheets', $data);
+            if ($entries >= 15) {
+                return 9; // Max sheet entries reached
+            }
+            // Check if item is already in pending sheets
+            $query1 = $this->db->get_where('tempsheets', ['ItemLookupCode' => $data['ItemLookupCode'],
+                'Shelf' => $data['Shelf'],'Status' => 0,'CashierName' => $data['CashierName']
+            ]);
 
-                $updated = $this->db->affected_rows();
-                if ($updated)
-                    $this->tempsheet_update($id, $data['ItemLookupCode']);
+            if ($query1->num_rows() === 0) {
+                // Validate shelf assignment consistency
+                $query2 = $this->db->query("SELECT s.Shelf AS shelfname FROM tempsheets s JOIN stocktake t ON t.ID = s.StocktakeID WHERE s.Status = 0 AND t.Status = 0 AND s.CashierName = ? LIMIT 1",[$data['CashierName']]);
 
-                return 2;
-            } else {
-                /** Checking whether the bin/shelf is captured */
-                if ($data['Shelf'] == 'NULL' || $data['Shelf'] == '0') {
-                    /** If the bin/shelf field is left blank */
-                    return 8;
+                $shelfname = $query2->row()->shelfname ?? null;
+                if ($shelfname === $data['Shelf'] || is_null($shelfname)) {
+                    // Insert new record into tempsheets
+                    $this->db->insert('tempsheets', $data);
+                    $id = $this->db->insert_id();
+                    $this->update_stocksheets($id, $data['ItemLookupCode']);
+                    $this->db->trans_complete(); // Commit transaction
+                    return 1; // Successfully inserted
                 } else {
-                    /** Checking the sheet entiers' count */
-                    $queryxx = $this->db->query("SELECT COUNT(s.`ID`) as entries FROM  `tempsheets`s JOIN `stocktake`t ON t.`ID`=s.`StocktakeID` WHERE s.`UserID`='" . $this->session->userdata('ID') . "' AND s.`CashierName` = '" . $this->session->userdata('Name') . "' AND s.`Status`=0 AND t.`Status`=0 ");
-
-                    $entries = $queryxx->row()->entries;
-
-                    if ($entries >= 15) {
-                        /** If maximum sheeet entries is reached */
-                        return 9;
-                    } else {
-                        /** If the sheet entries isn't reached */
-                        $user =  $this->session->userdata('Name');
-
-                        $query1 = $this->db->get_where('tempsheets', array('ItemLookupCode' => $data['ItemLookupCode'], 'Shelf' => $data['Shelf'], 'Status' => '0', 'CashierName' => $user));
-
-                        if ($query1->num_rows() == 0) {
-                            /** If the code isn't repeated in the pending sheet */
-                            $query12 = $this->db->query("SELECT s.`Shelf` AS shelfname FROM  `tempsheets`s JOIN `stocktake`t ON t.`ID`=s.`StocktakeID` WHERE s.`Status`=0 AND t.`Status`=0 AND s.`CashierName` = '$user'");
-                            $shelfname = $query12->row()->shelfname;
-
-                            if ($shelfname == $data['Shelf'] || $shelfname == NULL) {
-
-                                $query = $this->db->INSERT('tempsheets', $data);
-                                $id = $this->db->insert_id();
-                                $this->update_stocksheets($id, $data['ItemLookupCode']);
-
-                                return 1;
-                            } else {
-                                return 5;
-                            }
-                        } else {
-                            /** Keeping record of repeated item code */
-                            $query = $this->db->query("INSERT  `tempduplicate`(`ItemLookupCode`,`Quantity`,`tTime`,`UserID`,`CashierName`) VALUES('" . $data['ItemLookupCode'] . "', '" . $data['Quantity'] . "',NOW(),'" . $data['UserID'] . "','" . $data['CashierName'] . "')");
-
-                            return 4;
-                        }
-                    }
+                    return 5; // Shelf mismatch error
                 }
+            } else {
+                // Log repeated item code in tempduplicate table
+                $this->db->insert('tempduplicate', ['ItemLookupCode' => $data['ItemLookupCode'],'Quantity' => $data['Quantity'],'tTime' => $data['tTime'],'UserID' => $data['UserID'],'CashierName' => $data['CashierName']]);
+                return 4; // Duplicate item logged
             }
         }
+
+        $this->db->trans_complete(); // Commit or rollback transaction
+        return $this->db->trans_status() ? true : false;
+
     }
     /** Updating the existing SKU with the found quantities */
     public function updatecode()
     {
-        $query = $this->db->query("UPDATE `tempsheets`s JOIN `tempduplicate`d ON d.`ItemLookupCode`=s.`ItemLookupCode` SET s.`Quantity` = (s.`Quantity`+d.`Quantity`),s.`tTime` = NOW() WHERE s.`UserID` = d.`UserID` AND s.`CashierName`=d.`CashierName` AND s.`Status`=0");
+        $this->db->trans_start(); // Start transaction
+        // Securely update `tempsheets` quantities using JOIN
+        $this->db->query("UPDATE tempsheets s JOIN tempduplicate d ON d.ItemLookupCode = s.ItemLookupCode SET s.Quantity = s.Quantity + d.Quantity,s.tTime = NOW() WHERE s.UserID = d.UserID AND s.CashierName = d.CashierName AND s.Status = 0");
+        // Securely delete processed `tempduplicate` records
+        $this->db->where(['UserID' => $this->session->userdata('ID'),'CashierName' => $this->session->userdata('Name')]);
+        $this->db->delete('tempduplicate');
 
-        $query2 = $this->db->query("DELETE d FROM `tempduplicate`d WHERE d.`UserID`='" . $this->session->userdata('ID') . "' AND d.`CashierName`='" . $this->session->userdata('Name') . "' ");
+        $this->db->trans_complete(); // Commit or rollback transaction
+        return $this->db->trans_status() ? 6 : 2;
 
-        if ($query) {
-            return 6;
-        } else {
-            return 2;
-        }
     }
     /**Delete mistakanely feed entry */
     public function deletebinentry($id)

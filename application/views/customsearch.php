@@ -142,7 +142,7 @@
         var department = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_categories_department',
+            url: '<?php echo base_url("get_categories_department");?>',
             data: 'departmentid=' + department,
             success: function(data) {
                 var json = $.parseJSON(data)
@@ -158,7 +158,7 @@
         var category = $(this).val()
         $.ajax({
             type: 'post',
-            url: 'http://192.168.110.4/stocktake/Welcome/get_subcategories_department',
+            url: '<?php echo base_url("get_subcategories_department");?>',
             data: 'categoryid=' + category,
             success: function(data) {
                 var json = $.parseJSON(data)

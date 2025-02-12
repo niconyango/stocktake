@@ -7,7 +7,7 @@
             <small>List</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">List</li>
         </ol>
     </section>
@@ -21,7 +21,7 @@
                             <!--Start Date text input -->
                             <div class="box-body">
                                 <div class="col-md-12">
-                                    <form role="form" action="<?php echo base_url() ?>category_search" method="post">
+                                    <form role="form" action="<?php echo base_url('category_search'); ?>" method="post">
                                         <div class="row">
                                             <!-- Department  -->
                                             <div class="form-group col-md-4">
@@ -62,8 +62,8 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right btn-xs btn-flat" href="<?php echo base_url() ?>countedexcel"><i class="fa fa-file-excel-o"></i>Excel</a>
-                            <a class="btn btn-default pull-right btn-xs btn-flat" style="margin-right: 5px;" target="_blank" href="<?php echo base_url(); ?>pdf"><i class="fa fa-print"></i> Print</a>
+                            <a class="btn btn-success pull-right btn-xs btn-flat" href="<?php echo base_url('countedexcel'); ?>"><i class="fa fa-file-excel-o"></i>Excel</a>
+                            <a class="btn btn-default pull-right btn-xs btn-flat" style="margin-right: 5px;" target="_blank" href="<?php echo base_url('pdf'); ?>"><i class="fa fa-print"></i> Print</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">
@@ -226,7 +226,7 @@
             var department = $(this).val()
             $.ajax({
                 type: 'post',
-                url: 'http://192.168.110.4/stocktake/Welcome/get_categories_department',
+                url: '<?php echo base_url("get_categories_department");?>',
                 data: 'departmentid=' + department,
                 success: function(data) {
                     var json = $.parseJSON(data)
@@ -245,7 +245,7 @@
             var category = $(this).val()
             $.ajax({
                 type: 'post',
-                url: 'http://192.168.110.4/stocktake/Welcome/get_subcategories_department',
+                url: '<?php echo base_url("get_subcategories_department");?>',
                 data: 'categoryid=' + category,
                 success: function(data) {
                     var json = $.parseJSON(data)

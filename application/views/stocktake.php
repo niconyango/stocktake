@@ -266,7 +266,7 @@
         // }
         if (event.keyCode == 13) {
 
-            var url = "<?php echo base_url() ?>code_desc";
+            var url = "<?php echo base_url('code_desc'); ?>";
             var code = $("#item_code").val();
             var data = {
                 code: code
@@ -290,7 +290,7 @@
     $("#quantity").keyup(function(event) {
         if (event.keyCode == 13) {
 
-            var url = "<?php echo base_url() ?>stock_take";
+            var url = "<?php echo base_url('stock_take'); ?>";
             var data = $("#stock-form").serialize();
             $.ajax({
                 type: "POST",

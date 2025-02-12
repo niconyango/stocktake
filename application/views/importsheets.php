@@ -7,7 +7,7 @@
             <small>Import</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Stock Take</li>
         </ol>
     </section>
@@ -23,7 +23,7 @@
                     <div class="box-footer">
                         <div class="alert" role="alert" id="error" style="display:none"></div>
                         <!-- <form role="form" id="import-form"> -->
-                        <form action="<?php echo base_url(); ?>importData" method="post" enctype="multipart/form-data">
+                        <form action="<?php echo base_url('importData'); ?>" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="action" id="action" value="0" />
                             <label>Bins Sheet File:</label>
                             <input type="file" name="uploadFile" value="" /><br><br>
@@ -45,7 +45,7 @@
 </section><!-- /.content -->
 <script>
     $("#import").click(function(e) {
-        var url = "<?php echo base_url() ?>importData";
+        var url = "<?php echo base_url('importData'); ?>";
         var data = $("#import-form").serialize();
         $.ajax({
             type: "POST",

@@ -133,7 +133,7 @@
         $("#departmentsDistributions").html('')
         $("#departmentsDistributions").html('<canvas id="departmentsDistributions"></canvas>')
         $.ajax({
-            url: '<?php echo base_url();?>sheetsdepartment_status',
+            url: '<?php echo base_url("sheetsdepartment_status");?>',
             type: 'GET',
             dataType: 'json',
             success: function (data) {

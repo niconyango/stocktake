@@ -7,7 +7,7 @@
             <small>Report</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Report</li>
         </ol>
     </section>
@@ -21,8 +21,10 @@
                             <h3 class="box-title"></h3>
                         </div>
                         <div class="col-xs-6">
-                            <a class="btn btn-success pull-right" href="<?php echo base_url() ?>binexcel"><i class="fad fa-file-excel"></i>&nbsp; Export Excel</a>
-                            <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url() ?>pdf"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>
+                            <a class="btn btn-success pull-right" href="<?php echo base_url('binexcel'); ?>"><i class="fad
+                            fa-file-excel"></i>&nbsp; Export Excel</a>
+                            <a class="btn btn-default pull-right" style="margin-right: 5px;" target="_blank" href="<?php echo base_url('pdf');
+                            ?>"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>
                         </div>
                     </div><!-- /.box-header -->
                     <div class="box-body">

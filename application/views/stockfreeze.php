@@ -7,7 +7,7 @@
             <small>Take</small>
         </h1>
         <ol class="breadcrumb">
-            <li><a href="<?php echo base_url(); ?>stocks"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?php echo base_url('stocks'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Stock Take</li>
         </ol>
     </section>
@@ -23,12 +23,12 @@
                     <div class="box-footer justify-content-between">
                         <?php
                         if ($stocktakestatus == 0) { ?>
-                            <button onclick="location.href='<?php echo base_url(); ?>freeze'" type="button" class="btn btn-info"><i class="far fa-play-circle"></i>&nbsp;Freeze Stocks</button>
+                            <button onclick="location.href='<?php echo base_url("freeze"); ?>'" type="button" class="btn btn-info"><i class="far fa-play-circle"></i>&nbsp;Freeze Stocks</button>
                         <?php } else { ?>
                             <button type="button" class="btn btn-info" disabled><i class="fas fa-exclamation-circle"></i>&nbsp;Stock Take in Progress</button>
                             <?php
                             if ($stocktakeprogress == 0) { ?>
-                                <button onclick="location.href='<?php echo base_url(); ?>undofreeze'" type="button" class="btn btn-danger" data-dismiss="modal" style="float:right"><i class="fas fa-undo"></i>&nbsp;Undo Freeze</button>
+                                <button onclick="location.href='<?php echo base_url("undofreeze"); ?>'" type="button" class="btn btn-danger" data-dismiss="modal" style="float:right"><i class="fas fa-undo"></i>&nbsp;Undo Freeze</button>
                             <?php  } else { ?>
                                 <button type="button" class="btn btn-success" style="float:right" disabled><i class="far fa-smile-wink"></i>&nbsp;Happy stock Taking</button>
                             <?php } ?>
