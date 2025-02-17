@@ -621,6 +621,24 @@ class Stocktake extends CI_Model
         return $this->db->get()->result();// Fetch filtered and paginated results.
     }
 
+    // un-counted stocks excel.
+    public function uncounted_excel()
+    {
+        $this->db->select('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,IFNULL(s.Cost,0) AS Cost,IFNULL(s.`Price`,0) AS Price,IFNULL(s.`OriginalQty`,0) AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`tDate`) AS CountedDate,a.`Alias`');
+
+        $this->db->join('department d', 'd.`ID`=s.`DepartmentID`', 'left');
+        $this->db->join('category c', 'c.`ID`=s.`CategoryID`', 'left');
+        $this->db->join('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'left');
+        $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'left');
+        $this->db->where('s.`CountedQty`', 0);
+        $this->db->where('s.Status', 0);
+
+        $query = $this->db->get('`stocktake_entry` s');
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+    }
 
     // Case 1: Where a user is quering specifics(Department,category & subcategory).
     public function counted_stocks($DepartmentID, $CategoryID, $SubCategoryID)
@@ -709,21 +727,21 @@ class Stocktake extends CI_Model
         if ($length != -1) {
             $this->db->limit($length, $start);
         }
-        log_message('debug', 'Last Query: ' . $this->db->last_query());
+        //log_message('debug', 'Last Query: ' . $this->db->last_query());
         return $this->db->get()->result();// Fetch filtered and paginated results.
     }
 
 // stock holding report in excel.
-    public function holding_excel()
+    public function holdings_excel()
     {
-        $this->db->select('e.`ItemID`,a.`Alias`,e.`ItemLookupCode` as itemcode,e.`Description`,e.`BinLocation` as bin,e.`Price`,e.`Cost`,e.`OriginalQty`,DATE(s.`CountingDate`) as CountingDate,e.`CountedQty`');
+        $this->db->select('e.`ItemID`,a.`Alias`,e.`ItemLookupCode` as itemcode,e.`Description`,e.`BinLocation` as bin,e.`Price`,e.`Cost`,e.`OriginalQty`,DATE(s.`CountingDate`) as CountingDate,e.`CountedQty`,(e.CountedQty*e.Cost) as countedValue,(e.Cost*e.OriginalQty) as availableValue');
         $this->db->join('`stocktake_entry` e', 's.`ID` = e.`StocktakeID`');
         $this->db->join('`alias` a', 'a.`ItemID`=e.`ItemID`', 'left');
         $this->db->where('s.`Status`', 0);
         $this->db->where('e.`OriginalQty`>=', 0);
         $this->db->group_by('e.`ItemID`');
         $this->db->order_by('e.`ItemID`', 'desc');
-
+        //log_message('debug', 'Last Query: ' . $this->db->last_query());
         $query = $this->db->get('`stocktake` s');
         if ($query->num_rows() > 0) {
             return $query->result();
@@ -736,9 +754,9 @@ class Stocktake extends CI_Model
     {
         $this->db->select('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
 
-        $this->db->join('department d', 'd.`ID`=s.`DepartmentID`', 'left');
-        $this->db->join('category c', 'c.`ID`=s.`CategoryID`', 'left');
-        $this->db->join('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'left');
+        $this->db->join('`department` d', 'd.`ID`=s.`DepartmentID`', 'left');
+        $this->db->join('`category` c', 'c.`ID`=s.`CategoryID`', 'left');
+        $this->db->join('`subcategory` e', 'e.`ID`=s.`SubCategoryID`', 'left');
         $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'left');
         $this->db->group_by('s.`ID`');
         $this->db->where('s.`CountedQty`>', 0);
@@ -749,7 +767,6 @@ class Stocktake extends CI_Model
             return $query->result();
         } else
             return false;
-
     }
 
     /**  */

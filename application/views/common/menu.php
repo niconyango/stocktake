@@ -73,28 +73,22 @@
                                 </ul>
                             </li>
                         <?php } ?>
-                        <?php if ($this->session->userdata('SecurityLevel') == 19 || $this->session->userdata('SecurityLevel') == 5) { ?>
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link" data-bs-toggle="dropdown" id="navbarDropdown" role="button">
-                                    <i class="fal fa-chart-line"></i>
-                                    <span>Transactions <span class="caret"></span></span>
-                                </a>
-                                <ul class="dropdown-menu" role="menu">
-                                    <li><a class="dropdown-item" href="<?php echo base_url('syncstocksheets'); ?>"><i
-                                                    class="fal fa-sync"></i>&nbsp; Sync
-                                            Sheets</a></li>
+                        <li class="nav-item dropdown">
+                            <a href="#" class="nav-link" data-bs-toggle="dropdown" id="navbarDropdown" role="button">
+                                <i class="fal fa-chart-line"></i>
+                                <span>Transactions <span class="caret"></span></span>
+                            </a>
+                            <ul class="dropdown-menu" role="menu">
+                                <li><a class="dropdown-item" href="<?php echo base_url('syncstocksheets'); ?>"><i
+                                                class="fal fa-sync"></i>&nbsp; Sync Sheets</a></li>
+                                <li>
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li><a class="dropdown-item" href="<?php echo base_url('stocksposting'); ?>"><i
+                                                class="fal fa-circle"></i>&nbsp;Post Stocks</a></li>
 
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-                                    <li><a class="dropdown-item" href="<?php echo base_url('stocksposting'); ?>"><i
-                                                    class="fal fa-circle"></i>&nbsp; Post
-                                            Stocks</a></li>
-
-                                </ul>
-                            </li>
-                        <?php } ?>
-                        <!-- <li><a href="<?php echo base_url(); ?>stocksposting"><i class="nav-icon far fa-circle text-success"></i><span>&nbsp;Post Stocks</span></a></li> -->
+                            </ul>
+                        </li>
                         <li class="nav-item dropdown">
                             <a href="#" class="nav-link" data-bs-toggle="dropdown" id="navbarDropdown" role="button">
                                 <i class="fal fa-file-chart-line"></i>
@@ -102,8 +96,7 @@
                             </a>
                             <ul class="dropdown-menu" role="menu">
                                 <li><a class="dropdown-item" href="<?php echo base_url('holdings'); ?>"><i class="fal fa-server"></i>&nbsp;
-                                        Stocktake
-                                        Report</a>
+                                        Stocktake Report</a>
                                 </li>
                                 <li>
                                     <hr class="dropdown-divider">
@@ -114,21 +107,17 @@
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="<?php echo base_url('uncounted'); ?>"><i
-                                                class="fal fa-shopping-basket"></i>&nbsp;
-                                        Un-counted</a></li>
+                                                class="fal fa-shopping-basket"></i>&nbsp;Un-counted</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="<?php echo base_url('binsheets'); ?>"><i
-                                                class="fal fa-bags-shopping"></i>&nbsp; Shelf/Bin
-                                        Counts</a></li>
+                                                class="fal fa-bags-shopping"></i>&nbsp; Shelf/Bin Counts</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>
                                 <li><a class="dropdown-item" href="<?php echo base_url('history'); ?>"><i class="fal
-                                fa-history"></i>&nbsp;
-                                        Historical Stock
-                                        Take</a>
+                                fa-history"></i>&nbsp;Historical Stock Take</a>
                                 </li>
                             </ul>
                         </li>
@@ -141,9 +130,7 @@
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" data-bs-target="#pass-modal" data-bs-toggle="modal"> <i
-                                                class="fad fa-user-circle"></i>&nbsp;
-                                        Change
-                                        Password</a></li>
+                                                class="fad fa-user-circle"></i>&nbsp;Change Password</a></li>
                                 <li>
                                     <hr class="dropdown-divider">
                                 </li>

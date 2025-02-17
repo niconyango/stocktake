@@ -114,6 +114,7 @@ $route['sheetsdepartment_status'] = 'Welcome/sheetsdepartment_status';
 /**Excel files*/
 $route['excel'] = 'welcome/excel';
 $route['countedexcel'] = 'welcome/countedexcel';
+$route['uncounted_excel'] = 'welcome/uncounted_excel';
 $route['binexcel'] = 'welcome/binexcel';
 $route['customexcel'] = 'welcome/customexcel';
 $route['historyexcel'] = 'welcome/historyexcel';

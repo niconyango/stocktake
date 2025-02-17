@@ -65,7 +65,7 @@
                                 </div>
                             </div>
                             <div class="col-4">
-                                <a class="btn btn-success float-end" href="<?php echo base_url('countedexcel'); ?>"><i class="fad
+                                <a class="btn btn-success float-end" href="<?php echo base_url('uncounted_excel'); ?>"><i class="fad
                             fa-file-excel"></i>&nbsp; Export Excel</a>
                                 <a class="btn btn-danger float-end" style="margin-right: 5px;" target="_blank"
                                    href="<?php echo base_url('pdf'); ?>"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>

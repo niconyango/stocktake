@@ -29,6 +29,8 @@ class Welcome extends CI_Controller
         parent::__construct();
         //error_reporting(0);
         error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
+        //ini_set('memory_limit', '1G');
+        ini_set('memory_limit', '512M');
         // $this->load->library("session");
         // $this->load->helper('url');
     }
@@ -48,14 +50,10 @@ class Welcome extends CI_Controller
     {
         $data['Number'] = $this->security->xss_clean($this->input->post('username'));
         $data['Pass'] = $this->security->xss_clean($this->input->post('password'));
-
         $result = $this->Stocktake->login($data);
-
         if (!empty($result)) {
-
             if (($result->SecurityLevel === NULL) || ($result->SecurityLevel === 0)) {
                 $data["error"] = "Unknown User level";
-
                 $this->index($data);
             } else {
                 $session_data = array(
@@ -111,16 +109,16 @@ class Welcome extends CI_Controller
         }
     }
 
-    /**Dashboard method */
+    // Dashboard method.
     public function dashboard()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Dashboard';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['config'] = $this->Stocktake->storeconfig();
-
             $data['progress'] = $this->Stocktake->sheetprogress();
             //$data['department'] = $this->Stocktake->departmentalprogress();
-            $data['title'] = 'Dashboard';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -149,13 +147,12 @@ class Welcome extends CI_Controller
     public function users()
     {
         if ($this->session->userdata('logged')) {
-
+            // Header title.
+            $data['title'] = 'Users';
             $data['users'] = $this->Stocktake->system_users();
             $data['userlevels'] = $this->Stocktake->userlevels();
             $data['branches'] = $this->Stocktake->branches();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Users';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -166,11 +163,10 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Adding a new user method*/
+    // Adding a new user method.
     public function user()
     {
         $save = $this->Stocktake->user();
-
         if ($save == 1) {
             echo "User saved successully.";
         } else if ($save == 2) {
@@ -184,14 +180,14 @@ class Welcome extends CI_Controller
     public function items()
     {
         if ($this->session->userdata('logged')) {
-            /** departments,categories & subcategories */
+            // Header title.
+            $data['title'] = 'Items';
+            // departments,categories & subcategories.
             $data['departments'] = $this->Stocktake->departments();
             $data['categories'] = $this->Stocktake->category();
             $data['subcategories'] = $this->Stocktake->subcategory();
             $data['items'] = $this->Stocktake->items();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Items';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -206,9 +202,10 @@ class Welcome extends CI_Controller
     public function departments()
     {
         if ($this->session->userdata('logged')) {
+            // Header title
+            $data['title'] = 'Departments';
             $data['config'] = $this->Stocktake->storeconfig();
             $data['departments'] = $this->Stocktake->departments();
-            $data['title'] = 'Departments';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -223,11 +220,10 @@ class Welcome extends CI_Controller
     public function suppliers()
     {
         if ($this->session->userdata('logged')) {
-
+            // Header title
+            $data['title'] = 'Suppliers';
             $data['suppliers'] = $this->Stocktake->suppliers();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Suppliers';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -238,15 +234,14 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** List of all the customers */
+    // List of all the customers.
     public function customers()
     {
         if ($this->session->userdata('logged')) {
-
+            // Header title.
+            $data['title'] = 'Customers';
             $data['customers'] = $this->Stocktake->customers();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Customers';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -261,11 +256,11 @@ class Welcome extends CI_Controller
     public function transactions()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Stock Take Sheets';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['products'] = $this->Stocktake->transactions();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Stock Take Sheets';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -280,11 +275,11 @@ class Welcome extends CI_Controller
     public function stock_sheets()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Print Sheet';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['config'] = $this->Stocktake->storeconfig();
             $data['departments'] = $this->Stocktake->psheets();
-            /** Header title */
-            $data['title'] = 'Print Sheet';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -299,16 +294,16 @@ class Welcome extends CI_Controller
     public function fstocks()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Stocks Freeze';
             $data['config'] = $this->Stocktake->storeconfig();
             $data['freeze'] = $this->Stocktake->stocktakestatus();
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['stocktakeprogress'] = $this->Stocktake->stocktakeprogress();
-            /** departments,categories & subcategories */
+            // departments,categories & subcategories.
             $data['departments'] = $this->Stocktake->departments();
             $data['categories'] = $this->Stocktake->category();
             $data['subcategories'] = $this->Stocktake->subcategory();
-            /** Header title */
-            $data['title'] = 'Stocks Freeze';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -319,17 +314,17 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Posting stock take page method */
+    // Posting stock take page method.
     public function stocksposting()
     {
         if ($this->session->userdata('logged')) {
+            // Header title
+            $data['title'] = 'Post Stocks';
             $data['config'] = $this->Stocktake->storeconfig();
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['pendingsyncrecords'] = $this->Stocktake->pendingsyncrecords();
             $data['pendings'] = $this->Stocktake->pending_tempsheets();
             $data['tempsheets_status'] = $this->Stocktake->tempsheets_status();
-            /** Header title */
-            $data['title'] = 'Post Stocks';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -345,18 +340,15 @@ class Welcome extends CI_Controller
     {
         $id = $this->input->post('UserID');
         $data['entries'] = $this->Stocktake->products($id);
-
         echo json_encode($data);
     }
 
-    /** Posting all counted SKUs and reseting uncounted to Zero */
+    // Posting all counted SKUs and reseting uncounted to Zero.
     public function post_stocks()
     {
         $save = $this->Stocktake->post_stocks();
-
         if ($save == 1) {
             echo "Stocks Posted successully.";
-
             redirect("stocks", "refresh");
         } else {
             echo "Error Posting Stocks.";
@@ -364,14 +356,12 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Posting only counted SKUs only */
+    // Posting only counted SKUs only.
     public function post_counted()
     {
         $save = $this->Stocktake->post_counted();
-
         if ($save == 1) {
             echo "Stocks Posted successully.";
-
             redirect("stocks", "refresh");
         } else {
             echo "Error Posting Stocks.";
@@ -379,14 +369,12 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Freezing stocks for a stock take */
+    // Freezing stocks for a stock take.
     public function freeze()
     {
         $save = $this->Stocktake->fstocks();
-
         if ($save == 1) {
             echo "Stocks freezed successully.";
-
             redirect("fsheets", "refresh");
         } else {
             echo "Error Freezing Stocks.";
@@ -394,14 +382,14 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Bin numbers import interface  */
+    // Bin numbers import interface.
     public function import_sheets()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Import Stock Sheets';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Import Stock Sheets';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -536,13 +524,13 @@ class Welcome extends CI_Controller
     public function stocks()
     {
         if ($this->session->userdata('logged')) {
+            // Header title
+            $data['title'] = 'Stock Take';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['config'] = $this->Stocktake->storeconfig();
             $data['departments'] = $this->Stocktake->departments();
             $data['categories'] = $this->Stocktake->category();
             $data['subcategories'] = $this->Stocktake->subcategory();
-            // Header title
-            $data['title'] = 'Stock Take';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -600,19 +588,17 @@ class Welcome extends CI_Controller
         }
     }
 
-    // Uncounted items during stock take */
+    // un-counted items during stock take.
     public function uncounted()
     {
         if ($this->session->userdata('logged')) {
+            $data['title'] = 'Uncounted SKUs';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['config'] = $this->Stocktake->storeconfig();
             $data['departments'] = $this->Stocktake->departments();
             $data['categories'] = $this->Stocktake->category();
             $data['subcategories'] = $this->Stocktake->subcategory();
             // $data['products'] = $this->Stocktake->uncounted();
-
-            $data['title'] = 'Uncounted SKUs';
-
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -668,7 +654,7 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Bin/(Shelf) Counts */
+    // Bin/(Shelf) Counts.
     public function binsheets()
     {
         if ($this->session->userdata('logged')) {
@@ -687,7 +673,7 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Getting Category's department */
+    // Getting Category's department.
     public function get_categories_department()
     {
         $id = $this->input->post('departmentid');
@@ -696,7 +682,7 @@ class Welcome extends CI_Controller
         echo json_encode($data);
     }
 
-    /** Selecting subcategories in the specified department method */
+    // Selecting subcategories in the specified department method.
     public function get_subcategories_department()
     {
         $id = $this->input->post('categoryid');
@@ -705,17 +691,17 @@ class Welcome extends CI_Controller
         echo json_encode($data);
     }
 
-    /** Showing stocktake process method */
+    // Showing stocktake process method.
     public function fsheets()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Feed Sheets';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['tsheets'] = $this->Stocktake->tempsheets();
             $data['shelf'] = $this->Stocktake->shelf();
             $data['reason'] = $this->Stocktake->reasoncode();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Feed Sheets';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -772,7 +758,7 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Synching the sheets that have been fed method */
+    // Synching the sheets that have been fed method.
     public function syncstocksheets()
     {
         if ($this->session->userdata('logged')) {
@@ -797,20 +783,19 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Searching specific item feed */
+    // Searching specific item feed.
     public function specific_feed()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Specific Feed';
             $LookupCode = $this->input->post('LookupCode');
-
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['stocktakesheets'] = $this->Stocktake->stocktakesheets();
             $data['total'] = $this->Stocktake->syncstocksheetsval();
             $data['psynchs'] = $this->Stocktake->specific_feed($LookupCode);
             $data['shelf'] = $this->Stocktake->shelf();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Specific Feed';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -821,176 +806,222 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Stock take function */
+    // Stock take function.
     public function stock_take()
     {
-        $save = $this->Stocktake->stock_take();
-
-        if ($save == 1) {
-            $this->session->set_flashdata('res', 'Item entered successully.');
-        } else if ($save == 2) {
-            $this->session->set_flashdata('updating', 'Item updated successully.');
-        } else if ($save == 3) {
-            $this->session->set_flashdata('missing', 'Code doesn\'t exist.');
-        } else if ($save == 4) {
-            $this->session->set_flashdata('adding', 'Quantity updated successully.');
-        } else if ($save == 8) {
-            $this->session->set_flashdata('bin', 'Set the bin');
-        } else if ($save == 9) {
-            $this->session->set_flashdata('entries', 'Maximum sheet entries reached, please save the sheet to continue');
-        } else {
-            $this->session->set_flashdata('sheetchange', 'Please save the current sheet to continue.');
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->stock_take();
+                if ($save == 1) {
+                    $this->session->set_flashdata('res', 'Item entered successully.');
+                } else if ($save == 2) {
+                    $this->session->set_flashdata('updating', 'Item updated successully.');
+                } else if ($save == 3) {
+                    $this->session->set_flashdata('missing', 'Code doesn\'t exist.');
+                } else if ($save == 4) {
+                    $this->session->set_flashdata('adding', 'Quantity updated successully.');
+                } else if ($save == 8) {
+                    $this->session->set_flashdata('bin', 'Set the bin');
+                } else if ($save == 9) {
+                    $this->session->set_flashdata('entries', 'Maximum sheet entries reached, please save the sheet to continue');
+                } else {
+                    $this->session->set_flashdata('sheetchange', 'Please save the current sheet to continue.');
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Un-doing initiated stock take function */
+    // un-doing initiated stock take function.
     public function undofreeze()
     {
-        $save = $this->Stocktake->undofreeze();
-
-        if ($save == 1) {
-            echo "Stocks unfrozen successully.";
-
-            redirect("fstocks", "refresh");
-        } else {
-            echo "Error  unfreezing.";
-
-            redirect("fstocks", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->undofreeze();
+                if ($save == 1) {
+                    echo "Stocks unfrozen successully.";
+                    redirect("fstocks", "refresh");
+                } else {
+                    echo "Error  unfreezing.";
+                    redirect("fstocks", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Updating tempsheets before synching */
+    // updating tempsheets before synching.
     public function updatedetail()
     {
-        $save = $this->Stocktake->updatedetail();
-
-        if ($save == 1) {
-            $this->session->set_flashdata('res', 'Item updated successully.');
-        } else if ($save == 2) {
-            $this->session->set_flashdata('updating', 'Error updating.');
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->updatedetail();
+                if ($save == 1) {
+                    $this->session->set_flashdata('res', 'Item updated successully.');
+                } else if ($save == 2) {
+                    $this->session->set_flashdata('updating', 'Error updating.');
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Removing an entry in tempsheet */
+    // removing an entry in tempsheet.
     public function remove($id)
     {
-        $save = $this->Stocktake->deletebinentry($id);
-
-        if ($save == 1) {
-            $this->session->set_flashdata('res', 'Entry deleted successully.');
-
-            redirect("fsheets", "refresh");
-        } else if ($save == 2) {
-            $this->session->set_flashdata('updating', 'Error deleting.');
-
-            redirect("fsheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->deletebinentry($id);
+                if ($save == 1) {
+                    $this->session->set_flashdata('res', 'Entry deleted successully.');
+                    redirect("fsheets", "refresh");
+                } else if ($save == 2) {
+                    $this->session->set_flashdata('updating', 'Error deleting.');
+                    redirect("fsheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Deleting entry in the stock sheet table */
+    // deleting entry in the stock sheet table.
     public function del_sheet_entry($id)
     {
-        $save = $this->Stocktake->del_sheet_entry($id);
-
-        if ($save == 1) {
-            $this->session->set_flashdata('res', 'Entry deleted successully.');
-
-            redirect("syncstocksheets", "refresh");
-        } else if ($save == 2) {
-            $this->session->set_flashdata('updating', 'Error deleting.');
-
-            redirect("syncstocksheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->del_sheet_entry($id);
+                if ($save == 1) {
+                    $this->session->set_flashdata('res', 'Entry deleted successully.');
+                    redirect("syncstocksheets", "refresh");
+                } else if ($save == 2) {
+                    $this->session->set_flashdata('updating', 'Error deleting.');
+                    redirect("syncstocksheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Synchronise stock take information */
+    // Synchronise stock take information.
     public function sync_stocks()
     {
-        $save = $this->Stocktake->sync_stocks();
-
-        if ($save == 1) {
-            echo "Synched successully.";
-
-            redirect("syncstocksheets", "refresh");
-        } else {
-            echo "Error synching.";
-
-            redirect("syncstocksheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->sync_stocks();
+                if ($save == 1) {
+                    echo "Synched successully.";
+                    redirect("syncstocksheets", "refresh");
+                } else {
+                    echo "Error synching.";
+                    redirect("syncstocksheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Posting stock sheet after the user confirms */
+    // posting stock sheet after the user confirms */
     public function post_sheets()
     {
-        $save = $this->Stocktake->post_sheets();
-
-        if ($save == 1) {
-            echo "Sheet posted successully.";
-            // $this->session->set_flashdata('sheet', 'Sheet posted successully.');
-
-            redirect("fsheets", "refresh");
-        } else {
-            echo "Error Posting.";
-            // $this->session->set_flashdata('sheet', 'Error Posting.');
-
-            redirect("fsheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->post_sheets();
+                if ($save == 1) {
+                    echo "Sheet posted successully.";
+                    // $this->session->set_flashdata('sheet', 'Sheet posted successully.');
+                    redirect("fsheets", "refresh");
+                } else {
+                    echo "Error Posting.";
+                    // $this->session->set_flashdata('sheet', 'Error Posting.');
+                    redirect("fsheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Stock take entry details */
+    // Stock take entry details.
     public function product()
     {
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $id = $this->input->post('ItemID');
+                $data['product'] = $this->Stocktake->product($id);
 
-        $id = $this->input->post('ItemID');
-        $data['product'] = $this->Stocktake->product($id);
-
-        echo json_encode($data);
+                echo json_encode($data);
+                break;
+            default:
+                redirect('welcome');
+        }
     }
 
-    /** Getting searched item code */
+    // Getting searched item code.
     public function code_desc()
     {
-        $id = $this->input->GET('code');
-        $data = $this->Stocktake->code_desc($id);
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $id = $this->input->GET('code');
+                $data = $this->Stocktake->code_desc($id);
 
-        echo json_encode($data);
+                echo json_encode($data);
+                break;
+            default:
+                redirect('welcome');
+        }
     }
 
-    /** Updating the existing SKU with the found quantities */
+    // Updating the existing SKU with the found quantities.
     public function updatecode()
     {
-        $save = $this->Stocktake->updatecode();
-
-        if ($save == 6) {
-            $this->session->set_flashdata('added', 'Quantity updated successully.');
-            redirect("fsheets", "refresh");
-        } else {
-            $this->session->set_flashdata('missing', 'Code operation error.');
-            redirect("fsheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->updatecode();
+                if ($save == 6) {
+                    $this->session->set_flashdata('added', 'Quantity updated successully.');
+                    redirect("fsheets", "refresh");
+                } else {
+                    $this->session->set_flashdata('missing', 'Code operation error.');
+                    redirect("fsheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
     public function cancelcode()
     {
-        $save = $this->Stocktake->cancelcode();
-
-        if ($save == 4) {
-            $this->session->set_flashdata('res', 'Operation aborted.');
-            redirect("fsheets", "refresh");
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->cancelcode();
+                if ($save == 4) {
+                    $this->session->set_flashdata('res', 'Operation aborted.');
+                    redirect("fsheets", "refresh");
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Historical stock takes */
+    // Historical stock takes.
     public function history()
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'History';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['tsheets'] = $this->Stocktake->tempsheets();
             $data['users'] = $this->Stocktake->users();
             $data['history'] = $this->Stocktake->history();
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'History';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -1049,13 +1080,13 @@ class Welcome extends CI_Controller
     public function stocktakedetails($id)
     {
         if ($this->session->userdata('logged')) {
+            // Header title.
+            $data['title'] = 'Stock History';
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['departments'] = $this->Stocktake->departments();
-            //$data['details'] = $this->Stocktake->details($id);
+            // $data['details'] = $this->Stocktake->details($id);
             $data['info'] = $this->Stocktake->get_record($id);
             $data['config'] = $this->Stocktake->storeconfig();
-            /** Header title */
-            $data['title'] = 'Stock History';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -1066,16 +1097,17 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Searching historical stock takes details */
+    // Searching historical stock takes details.
     public function historysearch()
     {
         if ($this->session->userdata('logged')) {
-
+            // Header title.
+            $data['title'] = 'Current Stocks';
             $user = $this->input->post('userid');
             $startdate = date('Y-m-d', strtotime($this->input->post('sDate')));
             $enddate = date('Y-m-d', strtotime($this->input->post('eDate')));
 
-            /** Case 1: Where a user is quering specifics(Department,category & subcategory) */
+            // Case 1: Where a user is quering specifics(Department,category & subcategory).
             $data['config'] = $this->Stocktake->storeconfig();
             $data['stocktakestatus'] = $this->Stocktake->stocktakestatus();
             $data['departments'] = $this->Stocktake->departments();
@@ -1083,8 +1115,6 @@ class Welcome extends CI_Controller
             $data['subcategories'] = $this->Stocktake->subcategory();
             $data['users'] = $this->Stocktake->users();
             $data['freeze'] = $this->Stocktake->historysearch($user, $startdate, $enddate);
-            /** Header title */
-            $data['title'] = 'Current Stocks';
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -1095,20 +1125,25 @@ class Welcome extends CI_Controller
         }
     }
 
-    /** Updating password */
+    // updating password.
     public function update_password()
     {
-        $save = $this->Stocktake->updatepassword();
-
-        if ($save == 0) {
-            $data["miss"] = "The Email Address doesn't Exist.";
-            $this->load->view('common/header', $data);
-        } else {
-            echo "Password updated successully";
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $save = $this->Stocktake->updatepassword();
+                if ($save == 0) {
+                    $data["miss"] = "The Email Address doesn't Exist.";
+                    $this->load->view('common/header', $data);
+                } else {
+                    echo "Password updated successully";
+                }
+                break;
+            default:
+                redirect('welcome');
         }
     }
 
-    /** Importing  Excel files(:bin sheets) */
+    // Importing  Excel files(:bin sheets).
     public function importData()
     {
         if ($this->input->post('submit')) {
@@ -1176,314 +1211,392 @@ class Welcome extends CI_Controller
     // excels methods.
     public function excel()
     {
-        $stocks = $this->Stocktake->holding_excel();
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->holdings_excel();
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Stock ');
-        $sheet->setCellValue('B1', 'Code');
-        $sheet->setCellValue('C1', 'Description');
-        $sheet->setCellValue('D1', 'Cost');
-        $sheet->setCellValue('E1', 'Price');
-        $sheet->setCellValue('F1', 'Counted');
-        $sheet->setCellValue('G1', 'Counted Value');
-        $sheet->setCellValue('H1', 'Available');
-        $sheet->setCellValue('I1', 'Available Value');
-        $rows = 2;
-        foreach ($stocks as $val) {
-            $sheet->setCellValue('A' . $rows, $val->CountingDate);
-            $sheet->setCellValue('B' . $rows, $val->itemcode);
-            $sheet->setCellValue('C' . $rows, $val->Description);
-            $sheet->setCellValue('D' . $rows, $val->Cost);
-            $sheet->setCellValue('E' . $rows, $val->Price);
-            $sheet->setCellValue('F' . $rows, $val->CountedQty);
-            $sheet->setCellValue('G' . $rows, $val->CountedQty * $val->Cost);
-            $sheet->setCellValue('H' . $rows, $val->OriginalQty);
-            $sheet->setCellValue('I' . $rows, $val->OriginalQty * $val->Cost);
-            $rows++;
+                $sheet->setCellValue('A1', 'Stock ');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Alias');
+                $sheet->setCellValue('D1', 'Description');
+                $sheet->setCellValue('E1', 'Cost');
+                $sheet->setCellValue('F1', 'Price');
+                $sheet->setCellValue('G1', 'Counted');
+                $sheet->setCellValue('H1', 'Counted Value');
+                $sheet->setCellValue('I1', 'Available');
+                $sheet->setCellValue('J1', 'Available Value');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->CountingDate);
+                    $sheet->setCellValue('B' . $rows, $val->itemcode);
+                    $sheet->setCellValue('C' . $rows, $val->Alias);
+                    $sheet->setCellValue('D' . $rows, $val->Description);
+                    $sheet->setCellValue('E' . $rows, $val->Cost);
+                    $sheet->setCellValue('F' . $rows, $val->Price);
+                    $sheet->setCellValue('G' . $rows, $val->CountedQty);
+                    $sheet->setCellValue('H' . $rows, $val->countedValue);
+                    $sheet->setCellValue('I' . $rows, $val->OriginalQty);
+                    $sheet->setCellValue('J' . $rows, $val->availableValue);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'Current holding.xlsx'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-        $fileName = 'Stock Take'; // set filename for excel file to be exported
-        ob_end_clean();
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');    // download file
-        exit();
     }
 
-    /** Synch sheets method */
+    // Synch sheets method.
     public function synchronize()
     {
-        $stocks = $this->Stocktake->syncstocksheets_excel();
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->syncstocksheets_excel();
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $sheet->setCellValue('A1', 'Bin/(Shelf):');
-        $sheet->setCellValue('B1', 'Code');
-        $sheet->setCellValue('C1', 'Scan Code');
-        $sheet->setCellValue('D1', 'Description');
-        $sheet->setCellValue('E1', 'Quantity');
-        $sheet->setCellValue('F1', 'Cost');
-        $sheet->setCellValue('G1', 'Price');
-        $sheet->setCellValue('H1', 'Total Cost');
-        $sheet->setCellValue('I1', 'Total Price');
-        $sheet->setCellValue('J1', 'User');
-        $rows = 2;
-        //var_dump($sales);
-
-        foreach ($stocks as $val) {
-
-            $sheet->setCellValue('A' . $rows, $val->bin);
-            $sheet->setCellValue('B' . $rows, $val->ItemCode);
-            $sheet->setCellValue('C' . $rows, $val->Alias);
-            $sheet->setCellValue('D' . $rows, $val->Description);
-            $sheet->setCellValue('E' . $rows, $val->Quantity);
-            $sheet->setCellValue('F' . $rows, $val->Cost);
-            $sheet->setCellValue('G' . $rows, $val->Price);
-            $sheet->setCellValue('H' . $rows, $val->Quantity * $val->Cost);
-            $sheet->setCellValue('I' . $rows, $val->Quantity * $val->Price);
-            $sheet->setCellValue('J' . $rows, $val->Username);
-            $rows++;
+                $sheet->setCellValue('A1', 'Bin/(Shelf):');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Scan Code');
+                $sheet->setCellValue('D1', 'Description');
+                $sheet->setCellValue('E1', 'Quantity');
+                $sheet->setCellValue('F1', 'Cost');
+                $sheet->setCellValue('G1', 'Price');
+                $sheet->setCellValue('H1', 'Total Cost');
+                $sheet->setCellValue('I1', 'Total Price');
+                $sheet->setCellValue('J1', 'User');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->bin);
+                    $sheet->setCellValue('B' . $rows, $val->ItemCode);
+                    $sheet->setCellValue('C' . $rows, $val->Alias);
+                    $sheet->setCellValue('D' . $rows, $val->Description);
+                    $sheet->setCellValue('E' . $rows, $val->Quantity);
+                    $sheet->setCellValue('F' . $rows, $val->Cost);
+                    $sheet->setCellValue('G' . $rows, $val->Price);
+                    $sheet->setCellValue('H' . $rows, $val->Quantity * $val->Cost);
+                    $sheet->setCellValue('I' . $rows, $val->Quantity * $val->Price);
+                    $sheet->setCellValue('J' . $rows, $val->Username);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'Stock Take Progress'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-        $fileName = 'Stock Take Progress'; // set filename for excel file to be exported
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');    // download file
     }
 
-    /** Counted items in excel**/
+    // Counted items in excel
     public function countedexcel()
     {
-        $stocks = $this->Stocktake->stocks_excel();
-        if (empty($stocks)) {
-            exit('No data available to export.');
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->stocks_excel();
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setCellValue('A1', 'Date');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Description');
+                $sheet->setCellValue('D1', 'Cost');
+                $sheet->setCellValue('E1', 'Available Qty');
+                $sheet->setCellValue('F1', 'Available Value');
+                $sheet->setCellValue('G1', 'Counted Qty');
+                $sheet->setCellValue('H1', 'Counted Value');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->CountedDate);
+                    $sheet->setCellValue('B' . $rows, $val->Code);
+                    $sheet->setCellValue('C' . $rows, $val->description);
+                    $sheet->setCellValue('D' . $rows, $val->Cost);
+                    $sheet->setCellValue('E' . $rows, $val->OriginalQty);
+                    $sheet->setCellValue('F' . $rows, $val->OriginalQty * $val->Cost);
+                    $sheet->setCellValue('G' . $rows, $val->CountedQty);
+                    $sheet->setCellValue('H' . $rows, $val->CountedQty * $val->Cost);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'counted_skus.xlsx'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setCellValue('A1', 'Date');
-        $sheet->setCellValue('B1', 'Code');
-        $sheet->setCellValue('C1', 'Description');
-        $sheet->setCellValue('D1', 'Cost');
-        $sheet->setCellValue('E1', 'Available Qty');
-        $sheet->setCellValue('F1', 'Available Value');
-        $sheet->setCellValue('G1', 'Counted Qty');
-        $sheet->setCellValue('H1', 'Counted Value');
-        $rows = 2;
-        foreach ($stocks as $val) {
-            $sheet->setCellValue('A' . $rows, $val->CountedDate);
-            $sheet->setCellValue('B' . $rows, $val->Code);
-            $sheet->setCellValue('C' . $rows, $val->description);
-            $sheet->setCellValue('D' . $rows, $val->Cost);
-            $sheet->setCellValue('E' . $rows, $val->OriginalQty);
-            $sheet->setCellValue('F' . $rows, $val->OriginalQty * $val->Cost);
-            $sheet->setCellValue('G' . $rows, $val->CountedQty);
-            $sheet->setCellValue('H' . $rows, $val->CountedQty * $val->Cost);
-            $rows++;
-        }
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-        $fileName = 'Counted_SKUs.xlsx'; // set filename for excel file to be exported
-        ob_end_clean();
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');    // download file
-        exit();
     }
 
-    /**Bin counts report(:shelf)**/
+    // Counted items in excel
+    public function uncounted_excel()
+    {
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->uncounted_excel();
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
+                $sheet->setCellValue('A1', 'Date');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Description');
+                $sheet->setCellValue('D1', 'Cost');
+                $sheet->setCellValue('E1', 'Available Qty');
+                $sheet->setCellValue('F1', 'Available Value');
+                $sheet->setCellValue('G1', 'Counted Qty');
+                $sheet->setCellValue('H1', 'Counted Value');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->CountedDate);
+                    $sheet->setCellValue('B' . $rows, $val->Code);
+                    $sheet->setCellValue('C' . $rows, $val->description);
+                    $sheet->setCellValue('D' . $rows, $val->Cost);
+                    $sheet->setCellValue('E' . $rows, $val->OriginalQty);
+                    $sheet->setCellValue('F' . $rows, $val->OriginalQty * $val->Cost);
+                    $sheet->setCellValue('G' . $rows, $val->CountedQty);
+                    $sheet->setCellValue('H' . $rows, $val->CountedQty * $val->Cost);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'un_counted_skus.xlsx'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
+        }
+    }
+
+    // Bin counts report(:shelf).
     public function binexcel()
     {
-        //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->binsheets_excel();
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->binsheets_excel();
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $sheet->setCellValue('A1', 'Stock Date');
-        $sheet->setCellValue('B1', 'Bin/(Shelf):');
-        $sheet->setCellValue('C1', 'Code');
-        $sheet->setCellValue('D1', 'Description');
-        $sheet->setCellValue('E1', 'Cost');
-        $sheet->setCellValue('F1', 'Price');
-        $sheet->setCellValue('G1', 'Counted Qty');
-        $sheet->setCellValue('H1', 'Total Cost');
-        $sheet->setCellValue('I1', 'Total Price');
-        $sheet->setCellValue('J1', 'User');
-
-        $rows = 2;
-        //var_dump($sales);
-
-        foreach ($stocks as $val) {
-
-            $sheet->setCellValue('A' . $rows, $val->fedtime);
-            $sheet->setCellValue('B' . $rows, $val->bin);
-            $sheet->setCellValue('C' . $rows, $val->itemcode);
-            $sheet->setCellValue('D' . $rows, $val->Description);
-            $sheet->setCellValue('E' . $rows, $val->Cost);
-            $sheet->setCellValue('F' . $rows, $val->Price);
-            $sheet->setCellValue('G' . $rows, $val->Quantity);
-            $sheet->setCellValue('H' . $rows, $val->Quantity * $val->Cost);
-            $sheet->setCellValue('I' . $rows, $val->Quantity * $val->Price);
-            $sheet->setCellValue('J' . $rows, $val->username);
-
-            $rows++;
+                $sheet->setCellValue('A1', 'Stock Date');
+                $sheet->setCellValue('B1', 'Bin/(Shelf):');
+                $sheet->setCellValue('C1', 'Code');
+                $sheet->setCellValue('D1', 'Description');
+                $sheet->setCellValue('E1', 'Cost');
+                $sheet->setCellValue('F1', 'Price');
+                $sheet->setCellValue('G1', 'Counted Qty');
+                $sheet->setCellValue('H1', 'Total Cost');
+                $sheet->setCellValue('I1', 'Total Price');
+                $sheet->setCellValue('J1', 'User');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->fedtime);
+                    $sheet->setCellValue('B' . $rows, $val->bin);
+                    $sheet->setCellValue('C' . $rows, $val->itemcode);
+                    $sheet->setCellValue('D' . $rows, $val->Description);
+                    $sheet->setCellValue('E' . $rows, $val->Cost);
+                    $sheet->setCellValue('F' . $rows, $val->Price);
+                    $sheet->setCellValue('G' . $rows, $val->Quantity);
+                    $sheet->setCellValue('H' . $rows, $val->Quantity * $val->Cost);
+                    $sheet->setCellValue('I' . $rows, $val->Quantity * $val->Price);
+                    $sheet->setCellValue('J' . $rows, $val->username);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'Bin(shelf) Report'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
-        $fileName = 'Bin(shelf) Report'; // set filename for excel file to be exported
-
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');    // download file
     }
 
-    /** Historical stock take excel */
+    // Historical stock take excel.
     public function detailsexcel($id)
     {
-        $stocks = $this->Stocktake->excel_details($id);
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $stocks = $this->Stocktake->excel_details($id);
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Department');
-        $sheet->setCellValue('B1', 'Code');
-        $sheet->setCellValue('C1', 'Alias');
-        $sheet->setCellValue('D1', 'Description');
-        $sheet->setCellValue('E1', 'Cost');
-        $sheet->setCellValue('F1', 'Available Qty');
-        $sheet->setCellValue('G1', 'Available Value');
-        $sheet->setCellValue('H1', 'Counted Qty');
-        $sheet->setCellValue('I1', 'Counted Value');
+                $sheet->setCellValue('A1', 'Department');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Alias');
+                $sheet->setCellValue('D1', 'Description');
+                $sheet->setCellValue('E1', 'Cost');
+                $sheet->setCellValue('F1', 'Available Qty');
+                $sheet->setCellValue('G1', 'Available Value');
+                $sheet->setCellValue('H1', 'Counted Qty');
+                $sheet->setCellValue('I1', 'Counted Value');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->department);
+                    $sheet->setCellValue('B' . $rows, $val->lookup);
+                    $sheet->setCellValue('c' . $rows, $val->Alias);
+                    $sheet->setCellValue('D' . $rows, $val->Description);
+                    $sheet->setCellValue('E' . $rows, $val->Cost);
+                    $sheet->setCellValue('F' . $rows, $val->OriginalQty);
+                    $sheet->setCellValue('G' . $rows, ($val->OriginalQty * $val->Cost));
+                    $sheet->setCellValue('H' . $rows, $val->CountedQty);
+                    $sheet->setCellValue('I' . $rows, $val->CountedQty * $val->Cost);
+                    $rows++;
+                }
 
-        $rows = 2;
-        //var_dump($sales);
-        foreach ($stocks as $val) {
-            $sheet->setCellValue('A' . $rows, $val->department);
-            $sheet->setCellValue('B' . $rows, $val->lookup);
-            $sheet->setCellValue('c' . $rows, $val->Alias);
-            $sheet->setCellValue('D' . $rows, $val->Description);
-            $sheet->setCellValue('E' . $rows, $val->Cost);
-            $sheet->setCellValue('F' . $rows, $val->OriginalQty);
-            $sheet->setCellValue('G' . $rows, ($val->OriginalQty * $val->Cost));
-            $sheet->setCellValue('H' . $rows, $val->CountedQty);
-            $sheet->setCellValue('I' . $rows, $val->CountedQty * $val->Cost);
-            $rows++;
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'Stocktake"' . $id . '"History'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                redirect(base_url('stocktakedetails/' . $id));
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-        $fileName = 'Stocktake"' . $id . '"History'; // set filename for excel file to be exported
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-        $writer->save('php://output');    // download file
-        redirect(base_url('stocktakedetails/' . $id));
-        exit();
     }
 
-    /**Summary History List Excel */
+    // Summary History List Excel.
     public function historyexcel()
     {
-        $summary = $this->Stocktake->history();
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $summary = $this->Stocktake->history();
+                if (empty($summary)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $sheet->setCellValue('A1', 'Branch');
-        $sheet->setCellValue('B1', 'Start Date');
-        $sheet->setCellValue('C1', 'Initiated By');
-        $sheet->setCellValue('D1', 'Commited By');
-        $sheet->setCellValue('E1', 'Closed By');
-
-        $rows = 2;
-        //var_dump($sales);
-
-        foreach ($summary as $val) {
-
-            $sheet->setCellValue('A' . $rows, $val->Description);
-            $sheet->setCellValue('B' . $rows, $val->CountingDate);
-            $sheet->setCellValue('C' . $rows, $val->InitiatedByName);
-            $sheet->setCellValue('D' . $rows, $val->CommittedName);
-            $sheet->setCellValue('E' . $rows, $val->DateCommitted);
-
-            $rows++;
+                $sheet->setCellValue('A1', 'Branch');
+                $sheet->setCellValue('B1', 'Start Date');
+                $sheet->setCellValue('C1', 'Initiated By');
+                $sheet->setCellValue('D1', 'Commited By');
+                $sheet->setCellValue('E1', 'Closed By');
+                $rows = 2;
+                foreach ($summary as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->Description);
+                    $sheet->setCellValue('B' . $rows, $val->CountingDate);
+                    $sheet->setCellValue('C' . $rows, $val->InitiatedByName);
+                    $sheet->setCellValue('D' . $rows, $val->CommittedName);
+                    $sheet->setCellValue('E' . $rows, $val->DateCommitted);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = 'Stocktake History summary'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
-        $fileName = 'Stocktake History summary'; // set filename for excel file to be exported
-
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');    // download file
     }
 
-    /**Custom search Excel */
+    // Custom search Excel.
     public function customexcel()
     {
-        $DepartmentID = $this->input->post('DepartmentID');
-        $CategoryID = $this->input->post('CategoryID');
-        $SubCategoryID = $this->input->post('SubCategoryID');
+        switch ($this->session->userdata('logged')) {
+            case true:
+                $DepartmentID = $this->input->post('DepartmentID');
+                $CategoryID = $this->input->post('CategoryID');
+                $SubCategoryID = $this->input->post('SubCategoryID');
 
-        $stocks = $this->Stocktake->customised_holdings($DepartmentID, $CategoryID, $SubCategoryID);
+                $stocks = $this->Stocktake->customised_holdings($DepartmentID, $CategoryID, $SubCategoryID);
+                if (empty($stocks)) {
+                    exit('No data available to export.');
+                }
+                $spreadsheet = new Spreadsheet();
+                $sheet = $spreadsheet->getActiveSheet();
 
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $sheet->setCellValue('A1', 'Stock Date');
-        $sheet->setCellValue('B1', 'Code');
-        $sheet->setCellValue('C1', 'Description');
-        $sheet->setCellValue('D1', 'Cost');
-        $sheet->setCellValue('E1', 'Price');
-        $sheet->setCellValue('F1', 'Available Qty');
-        $sheet->setCellValue('G1', 'Available Value');
-        $sheet->setCellValue('H1', 'Counted Qty');
-        $sheet->setCellValue('I1', 'Counted Value');
-
-        $rows = 2;
-        //var_dump($sales);
-
-        foreach ($stocks as $val) {
-
-            $sheet->setCellValue('A' . $rows, $val->CountingDate);
-            $sheet->setCellValue('B' . $rows, $val->itemcode);
-            $sheet->setCellValue('C' . $rows, $val->Description);
-            $sheet->setCellValue('D' . $rows, $val->Cost);
-            $sheet->setCellValue('E' . $rows, $val->Price);
-            $sheet->setCellValue('F' . $rows, $val->OriginalQty);
-            $sheet->setCellValue('G' . $rows, $val->OriginalQty * $val->Cost);
-            $sheet->setCellValue('H' . $rows, $val->CountedQty);
-            $sheet->setCellValue('I' . $rows, $val->CountedQty * $val->Cost);
-
-            $rows++;
+                $sheet->setCellValue('A1', 'Stock Date');
+                $sheet->setCellValue('B1', 'Code');
+                $sheet->setCellValue('C1', 'Description');
+                $sheet->setCellValue('D1', 'Cost');
+                $sheet->setCellValue('E1', 'Price');
+                $sheet->setCellValue('F1', 'Available Qty');
+                $sheet->setCellValue('G1', 'Available Value');
+                $sheet->setCellValue('H1', 'Counted Qty');
+                $sheet->setCellValue('I1', 'Counted Value');
+                $rows = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValue('A' . $rows, $val->CountingDate);
+                    $sheet->setCellValue('B' . $rows, $val->itemcode);
+                    $sheet->setCellValue('C' . $rows, $val->Description);
+                    $sheet->setCellValue('D' . $rows, $val->Cost);
+                    $sheet->setCellValue('E' . $rows, $val->Price);
+                    $sheet->setCellValue('F' . $rows, $val->OriginalQty);
+                    $sheet->setCellValue('G' . $rows, $val->OriginalQty * $val->Cost);
+                    $sheet->setCellValue('H' . $rows, $val->CountedQty);
+                    $sheet->setCellValue('I' . $rows, $val->CountedQty * $val->Cost);
+                    $rows++;
+                }
+                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
+                $fileName = '" ' . $DepartmentID . ' " Stocktake.xlsx'; // set filename for excel file to be exported
+                ob_end_clean();
+                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Disposition: attachment;filename="' . $fileName . '"');
+                header('Cache-Control: max-age=0');
+                $writer->save('php://output');    // download file
+                exit();
+                break;
+            default:
+                redirect('welcome');
         }
-
-        $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
-        $fileName = '" ' . $DepartmentID . ' " Stocktake'; // set filename for excel file to be exported
-
-        header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
-        header('Cache-Control: max-age=0');
-
-        $writer->save('php://output');    // download file
     }
 
-    /** Sign out method  */
+    // Sign out method.
     public function logout()
     {
         $details = array('ID', 'LastUpdated', 'Number', 'StoreID', 'Name', 'FloorLimit', 'ReturnLimit', 'DropLimit', 'CashDrawerNumber', 'SecurityLevel', 'Priviledges', 'EmailAddress', 'FailedLogonAttempts', 'MaxOverShortAmount', 'OverShortLimitType', 'Telephone', 'Enabled', 'TimeSchedule', 'LastPasswordChange', 'PassExpires', 'InventoryLocation', 'SalesRepID', 'BinLocation', 'logged');
 
         $this->session->unset_userdata($details);
         $this->session->sess_destroy();
-
         redirect('welcome');
     }
 }

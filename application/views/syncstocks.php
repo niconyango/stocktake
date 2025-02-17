@@ -155,7 +155,6 @@
                                 <th class="text-end"><?php echo number_format($totalcounts, 2); ?></th>
                                 <th class="text-end"><?php echo number_format($totalcost, 2); ?></th>
                                 <th class="text-end"><?php echo number_format($totalprice, 2); ?></th>
-                                <th>Action</th>
                             </tr>
                             </tfoot>
                         </table>
@@ -263,6 +262,7 @@
 <!-- /.modal-content -->
 <script type="text/javascript">
     $(document).ready(function () {
+        var userlevel = "<?php echo $this->session->userdata('SecurityLevel');?>"
         $("body").on('click', '.btn-edit', function (e) {
             //var bin = $(this).attr('bin')
             $("#action").val($(this).attr('data-id'));
@@ -345,8 +345,12 @@
                             let editButton = `<button class="btn btn-sm btn-warning btn-edit" data-id="${row[0]}" shelf="${row[1]}"
                             itemcode="${row[2]}" description="${row[4]}" quantity="${row[7]}"><i class="fa-thin fa-pen-to-square"></i> Edit</button>`;
                             let deleteButton = `<a class="btn btn-sm btn-danger" href="<?php echo base_url() ?>del_sheet_entry/${data[0]}"><i class="far fa-trash"></i>&nbsp;&nbsp; Delete</a>`;
-
-                            return editButton + ' ' + deleteButton;
+                            let blockedButton = `<button class="btn btn-sm btn-danger btn-edit disabled"><i class="fa-thin fa-ban"></i> Restricted</button>`;
+                            if (userlevel == 5 || userlevel == 19) {
+                                return editButton + ' ' + deleteButton;
+                            } else {
+                                return blockedButton;
+                            }
                         }
                     }
                 ],
