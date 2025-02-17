@@ -739,9 +739,9 @@ class Stocktake extends CI_Model
         $this->db->join('`alias` a', 'a.`ItemID`=e.`ItemID`', 'left');
         $this->db->where('s.`Status`', 0);
         $this->db->where('e.`OriginalQty`>=', 0);
-        $this->db->group_by('e.`ItemID`');
+        $this->db->group_by('e.`ID`');
         $this->db->order_by('e.`ItemID`', 'desc');
-        //log_message('debug', 'Last Query: ' . $this->db->last_query());
+        log_message('debug', 'Last Query: ' . $this->db->last_query());
         $query = $this->db->get('`stocktake` s');
         if ($query->num_rows() > 0) {
             return $query->result();
@@ -1179,7 +1179,7 @@ class Stocktake extends CI_Model
     // Show all the items that are pending synching.
     public function _syncstocksheets($search, $order_by, $order_dir, $LookupCode)
     {
-        $this->db->select("s.ID,s.Description,s.bin,s.Quantity,a.`Alias`,i.`ItemLookupCode` as ItemCode,i.`Cost`,i.`Price`");
+        $this->db->select("s.ID,s.Description,s.bin,s.Username,s.Quantity,a.`Alias`,i.`ItemLookupCode` as ItemCode,i.`Cost`,(s.Quantity*i.Cost) as costValue,i.`Price`,(i.`Price`*s.`Quantity`) as priceValue");
         $this->db->from('`stocksheets` s');
         $this->db->join('`item` i', 'i.`ID`=s.`ItemID`');
         $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
@@ -1246,7 +1246,7 @@ class Stocktake extends CI_Model
         $query = $this->db->get('`stocksheets` s');
 
         if ($query) {
-            if ($query->row() <> '') {
+            if ($query->row() != '') {
                 return $query->row()->total;
             } else {
                 return 0;
@@ -1315,7 +1315,7 @@ class Stocktake extends CI_Model
         $this->db->where('s.`UserID`', $this->session->userdata('ID'));
         $this->db->where('s.Status', 0);
         $this->db->where('t.`Status`', 0);
-        $this->db->order_by('s.`ID`', 'DESC');
+        $this->db->order_by('s.`ID`', 'desc');
         $this->db->limit('1');
 
         $query = $this->db->get('`tempsheets` s');

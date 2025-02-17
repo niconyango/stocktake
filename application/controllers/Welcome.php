@@ -740,8 +740,9 @@ class Welcome extends CI_Controller
                         $row->Cost,
                         $row->Price,
                         $row->Quantity,
-                        $row->Cost * $row->Quantity,
-                        $row->Price * $row->Quantity
+                        $row->costValue,
+                        $row->priceValue,
+                        $row->Username
                     ];
                 }
                 //return json response
@@ -1214,6 +1215,7 @@ class Welcome extends CI_Controller
         switch ($this->session->userdata('logged')) {
             case true:
                 $stocks = $this->Stocktake->holdings_excel();
+                
                 if (empty($stocks)) {
                     exit('No data available to export.');
                 }

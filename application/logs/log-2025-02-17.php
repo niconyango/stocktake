@@ -24348,3 +24348,191 @@ INFO - 2025-02-17 14:15:21 --> Model "Stocktake" initialized
 INFO - 2025-02-17 14:15:21 --> Controller Class Initialized
 INFO - 2025-02-17 14:15:21 --> Final output sent to browser
 DEBUG - 2025-02-17 14:15:21 --> Total execution time: 0.0620
+INFO - 2025-02-17 15:16:33 --> Config Class Initialized
+INFO - 2025-02-17 15:16:33 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:16:33 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:16:33 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:16:33 --> URI Class Initialized
+INFO - 2025-02-17 15:16:33 --> Router Class Initialized
+INFO - 2025-02-17 15:16:33 --> Output Class Initialized
+INFO - 2025-02-17 15:16:33 --> Security Class Initialized
+DEBUG - 2025-02-17 15:16:33 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:16:33 --> Input Class Initialized
+INFO - 2025-02-17 15:16:33 --> Language Class Initialized
+INFO - 2025-02-17 15:16:33 --> Loader Class Initialized
+INFO - 2025-02-17 15:16:33 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:16:33 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:16:33 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:16:33 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:16:33 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:16:33 --> Upload Class Initialized
+INFO - 2025-02-17 15:16:33 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:16:33 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:16:33 --> User Agent Class Initialized
+INFO - 2025-02-17 15:16:33 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:16:33 --> Controller Class Initialized
+INFO - 2025-02-17 15:16:33 --> File loaded: /var/www/html/stocktake/application/views/common/header.php
+INFO - 2025-02-17 15:16:33 --> File loaded: /var/www/html/stocktake/application/views/common/menu.php
+INFO - 2025-02-17 15:16:33 --> File loaded: /var/www/html/stocktake/application/views/holdings.php
+INFO - 2025-02-17 15:16:33 --> File loaded: /var/www/html/stocktake/application/views/common/footer.php
+INFO - 2025-02-17 15:16:33 --> Final output sent to browser
+DEBUG - 2025-02-17 15:16:33 --> Total execution time: 0.1563
+INFO - 2025-02-17 15:16:34 --> Config Class Initialized
+INFO - 2025-02-17 15:16:34 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:16:34 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:16:34 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:16:34 --> URI Class Initialized
+INFO - 2025-02-17 15:16:34 --> Router Class Initialized
+INFO - 2025-02-17 15:16:34 --> Output Class Initialized
+INFO - 2025-02-17 15:16:34 --> Security Class Initialized
+DEBUG - 2025-02-17 15:16:34 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:16:34 --> Input Class Initialized
+INFO - 2025-02-17 15:16:34 --> Language Class Initialized
+INFO - 2025-02-17 15:16:34 --> Loader Class Initialized
+INFO - 2025-02-17 15:16:34 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:16:34 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:16:34 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:16:34 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:16:34 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:16:34 --> Upload Class Initialized
+INFO - 2025-02-17 15:16:34 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:16:34 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:16:34 --> User Agent Class Initialized
+INFO - 2025-02-17 15:16:34 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:16:34 --> Controller Class Initialized
+INFO - 2025-02-17 15:16:35 --> Final output sent to browser
+DEBUG - 2025-02-17 15:16:35 --> Total execution time: 1.1435
+INFO - 2025-02-17 15:16:37 --> Config Class Initialized
+INFO - 2025-02-17 15:16:37 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:16:37 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:16:37 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:16:37 --> URI Class Initialized
+INFO - 2025-02-17 15:16:37 --> Router Class Initialized
+INFO - 2025-02-17 15:16:37 --> Output Class Initialized
+INFO - 2025-02-17 15:16:37 --> Security Class Initialized
+DEBUG - 2025-02-17 15:16:37 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:16:37 --> Input Class Initialized
+INFO - 2025-02-17 15:16:37 --> Language Class Initialized
+INFO - 2025-02-17 15:16:37 --> Loader Class Initialized
+INFO - 2025-02-17 15:16:37 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:16:37 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:16:37 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:16:37 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:16:37 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:16:37 --> Upload Class Initialized
+INFO - 2025-02-17 15:16:37 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:16:37 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:16:37 --> User Agent Class Initialized
+INFO - 2025-02-17 15:16:37 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:16:37 --> Controller Class Initialized
+DEBUG - 2025-02-17 15:16:37 --> Last Query: 
+ERROR - 2025-02-17 15:16:43 --> Severity: error --> Exception: Worksheet!D8175 -> Formula Error: An unexpected error occurred /var/www/html/stocktake/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Cell/Cell.php 270
+INFO - 2025-02-17 15:20:57 --> Config Class Initialized
+INFO - 2025-02-17 15:20:57 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:20:57 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:20:57 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:20:57 --> URI Class Initialized
+INFO - 2025-02-17 15:20:57 --> Router Class Initialized
+INFO - 2025-02-17 15:20:57 --> Output Class Initialized
+INFO - 2025-02-17 15:20:57 --> Security Class Initialized
+DEBUG - 2025-02-17 15:20:57 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:20:57 --> Input Class Initialized
+INFO - 2025-02-17 15:20:57 --> Language Class Initialized
+INFO - 2025-02-17 15:20:57 --> Loader Class Initialized
+INFO - 2025-02-17 15:20:57 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:20:57 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:20:57 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:20:57 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:20:57 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:20:57 --> Upload Class Initialized
+INFO - 2025-02-17 15:20:57 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:20:57 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:20:57 --> User Agent Class Initialized
+INFO - 2025-02-17 15:20:57 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:20:57 --> Controller Class Initialized
+INFO - 2025-02-17 15:20:57 --> File loaded: /var/www/html/stocktake/application/views/common/header.php
+INFO - 2025-02-17 15:20:57 --> File loaded: /var/www/html/stocktake/application/views/common/menu.php
+INFO - 2025-02-17 15:20:57 --> File loaded: /var/www/html/stocktake/application/views/holdings.php
+INFO - 2025-02-17 15:20:57 --> File loaded: /var/www/html/stocktake/application/views/common/footer.php
+INFO - 2025-02-17 15:20:57 --> Final output sent to browser
+DEBUG - 2025-02-17 15:20:57 --> Total execution time: 0.2362
+INFO - 2025-02-17 15:20:58 --> Config Class Initialized
+INFO - 2025-02-17 15:20:58 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:20:58 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:20:58 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:20:58 --> URI Class Initialized
+INFO - 2025-02-17 15:20:58 --> Router Class Initialized
+INFO - 2025-02-17 15:20:58 --> Output Class Initialized
+INFO - 2025-02-17 15:20:58 --> Security Class Initialized
+DEBUG - 2025-02-17 15:20:58 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:20:58 --> Input Class Initialized
+INFO - 2025-02-17 15:20:58 --> Language Class Initialized
+INFO - 2025-02-17 15:20:58 --> Loader Class Initialized
+INFO - 2025-02-17 15:20:58 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:20:58 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:20:58 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:20:58 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:20:58 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:20:58 --> Upload Class Initialized
+INFO - 2025-02-17 15:20:58 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:20:58 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:20:58 --> User Agent Class Initialized
+INFO - 2025-02-17 15:20:58 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:20:58 --> Controller Class Initialized
+INFO - 2025-02-17 15:20:59 --> Final output sent to browser
+DEBUG - 2025-02-17 15:20:59 --> Total execution time: 1.2963
+INFO - 2025-02-17 15:21:15 --> Config Class Initialized
+INFO - 2025-02-17 15:21:15 --> Hooks Class Initialized
+DEBUG - 2025-02-17 15:21:15 --> UTF-8 Support Enabled
+INFO - 2025-02-17 15:21:15 --> Utf8 Class Initialized
+INFO - 2025-02-17 15:21:15 --> URI Class Initialized
+INFO - 2025-02-17 15:21:15 --> Router Class Initialized
+INFO - 2025-02-17 15:21:15 --> Output Class Initialized
+INFO - 2025-02-17 15:21:15 --> Security Class Initialized
+DEBUG - 2025-02-17 15:21:15 --> Global POST, GET and COOKIE data sanitized
+INFO - 2025-02-17 15:21:15 --> Input Class Initialized
+INFO - 2025-02-17 15:21:15 --> Language Class Initialized
+INFO - 2025-02-17 15:21:15 --> Loader Class Initialized
+INFO - 2025-02-17 15:21:15 --> Helper loaded: url_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: file_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: html_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: string_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: date_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: email_helper
+INFO - 2025-02-17 15:21:15 --> Helper loaded: security_helper
+INFO - 2025-02-17 15:21:15 --> Database Driver Class Initialized
+DEBUG - 2025-02-17 15:21:15 --> Session: "sess_save_path" is empty; using "session.save_path" value from php.ini.
+INFO - 2025-02-17 15:21:15 --> Session: Class initialized using 'files' driver.
+INFO - 2025-02-17 15:21:15 --> Upload Class Initialized
+INFO - 2025-02-17 15:21:15 --> Helper loaded: form_helper
+INFO - 2025-02-17 15:21:15 --> Form Validation Class Initialized
+INFO - 2025-02-17 15:21:15 --> User Agent Class Initialized
+INFO - 2025-02-17 15:21:15 --> Model "Stocktake" initialized
+INFO - 2025-02-17 15:21:15 --> Controller Class Initialized
+DEBUG - 2025-02-17 15:21:15 --> Last Query: 
+ERROR - 2025-02-17 15:21:28 --> Severity: error --> Exception: Worksheet!D8175 -> Formula Error: An unexpected error occurred /var/www/html/stocktake/vendor/phpoffice/phpspreadsheet/src/PhpSpreadsheet/Cell/Cell.php 270

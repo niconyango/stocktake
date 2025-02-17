@@ -134,6 +134,7 @@
                             <thead>
                             <tr>
                                 <th>#</th>
+                                <th>User</th>
                                 <th>Bin/(Shelf):</th>
                                 <th>Lookup Code</th>
                                 <th>Alias</th>
@@ -151,10 +152,9 @@
                             </tbody>
                             <tfoot>
                             <tr>
-                                <th colspan="7">Totals</th>
-                                <th class="text-end"><?php echo number_format($totalcounts, 2); ?></th>
-                                <th class="text-end"><?php echo number_format($totalcost, 2); ?></th>
-                                <th class="text-end"><?php echo number_format($totalprice, 2); ?></th>
+                                <th colspan="8">Totals</th>
+                                <th class="text-end"></th>
+                                <th class="text-end"></th>
                             </tr>
                             </tfoot>
                         </table>
@@ -171,7 +171,7 @@
     <div class="modal-dialog modal-default">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">Entry Details</h4>
+                <h4 class="modal-title"><i class="fa-thin fa-clipboard"></i>&nbsp;Entry Details</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -294,6 +294,7 @@
             "columns":
                 [
                     {"data": 0, orderable: true, "searchable": true},
+                    {"data": 10, orderable: true, "searchable": true},
                     {"data": 1, orderable: true, "searchable": true},
                     {"data": 2, orderable: true, "searchable": true},
                     {"data": 3, orderable: true, "searchable": true},
@@ -357,7 +358,39 @@
             "order":
                 [{
                     "column": 0, "dir": "asc"
-                }]
+                }], footerCallback: function (row, data, start, end, display) {
+                // Calculate total cost
+                var api = this.api();
+                // currency formating.
+                var numberFormatter = new Intl.NumberFormat('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                // // Total over all pages
+                var totalCost = api
+                    .rows({search: 'applied'}) // Only rows matching the filter
+                    .data()
+                    .pluck(8)
+                    .reduce(function (a, b) {
+                        return parseFloat(a) + parseFloat(b);
+                    }, 0);
+
+                var totalPrice = api
+                    .rows({search: 'applied'}) // Only rows matching the filter
+                    .data()
+                    .pluck(9)
+                    .reduce(function (a, b) {
+                        return parseFloat(a) + parseFloat(b);
+                    }, 0);
+
+                // Update footer
+                $(api.column(8).footer()).html(
+                    numberFormatter.format(totalCost)
+                );
+                $(api.column(9).footer()).html(
+                    numberFormatter.format(totalPrice)
+                );
+            }
         })
         // Trigger table reload on form submission
         $('#btn-search').on('click', function () {
