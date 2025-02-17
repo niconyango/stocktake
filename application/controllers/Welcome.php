@@ -27,7 +27,8 @@ class Welcome extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        error_reporting(0);
+        //error_reporting(0);
+        error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
         // $this->load->library("session");
         // $this->load->helper('url');
     }
@@ -1110,9 +1111,7 @@ class Welcome extends CI_Controller
     /** Importing  Excel files(:bin sheets) */
     public function importData()
     {
-
         if ($this->input->post('submit')) {
-
             $path = 'assets/uploads/';
             require_once APPPATH . "/third_party/PHPExcel.php";
             $config['upload_path'] = $path;
@@ -1121,61 +1120,63 @@ class Welcome extends CI_Controller
             $this->load->library('upload', $config);
             $this->upload->initialize($config);
             if (!$this->upload->do_upload('uploadFile')) {
-                $error = array('error' => $this->upload->display_errors());
+                die("Upload error: " . $this->upload->display_errors());
             } else {
-                $data = array('upload_data' => $this->upload->data());
+                $data = $this->upload->data();
+                echo "File uploaded: " . $data['file_name'];
             }
-            if (empty($error)) {
-                if (!empty($data['upload_data']['file_name'])) {
-                    $import_xls_file = $data['upload_data']['file_name'];
-                } else {
-                    $import_xls_file = 0;
-                }
-                $inputFileName = $path . $import_xls_file;
-
-                try {
-                    $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
-                    $objReader = PHPExcel_IOFactory::createReader($inputFileType);
-                    $objPHPExcel = $objReader->load($inputFileName);
-                    $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
-                    $flag = true;
-                    $i = 0;
-                    foreach ($allDataInSheet as $value) {
-                        if ($flag) {
-                            $flag = false;
-                            continue;
-                        }
-                        $inserdata[$i]['Shelf'] = $value['A'];
-                        $inserdata[$i]['ItemLookupCode'] = $value['B'];
-                        $inserdata[$i]['Description'] = $value['C'];
-                        $i++;
-                    }
-                    $result = $this->Stocktake->importData($inserdata);
-                    if ($result) {
-                        echo "Imported successfully";
-
-                        redirect("import_sheets", "refresh");
-                    } else {
-                        echo "ERROR !";
-                    }
-                } catch (Exception $e) {
-                    die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME)
-                        . '": ' . $e->getMessage());
-                }
+            if (!empty($data['file_name'])) {
+                $inputFileName = $path . $data['file_name'];
             } else {
-                echo $error['error'];
-                redirect("import_sheets", "refresh");
+                die("No file uploaded.");
+            }
+            try {
+                $inputFileType = PHPExcel_IOFactory::identify($inputFileName);
+                $objReader = PHPExcel_IOFactory::createReader($inputFileType);
+                $objPHPExcel = $objReader->load($inputFileName);
+                $allDataInSheet = $objPHPExcel->getActiveSheet()->toArray(null, true, true, true);
+                // Debug: Print Excel Data
+                echo "<pre>";
+                print_r($allDataInSheet);
+                echo "</pre>";
+                exit;
+                $flag = true;
+                $inserdata = [];
+                foreach ($allDataInSheet as $value) {
+                    if ($flag) {
+                        $flag = false;
+                        continue;
+                    }
+                    $inserdata[] = [
+                        'Shelf' => $value['A'],
+                        'ItemLookupCode' => $value['B'],
+                        'Description' => $value['C'],
+                    ];
+                }
+                // Debug: Print Data Before Insert
+                echo "<pre>";
+                print_r($inserdata);
+                echo "</pre>";
+                exit;
+                $result = $this->Stocktake->importData($inserdata);
+                if ($result) {
+                    echo "Imported successfully";
+                    redirect("import_sheets", "refresh");
+                } else {
+                    die("Database Insert Failed.");
+                }
+            } catch (Exception $e) {
+                die('Error loading file "' . pathinfo($inputFileName, PATHINFO_BASENAME) . '": ' . $e->getMessage());
             }
         }
         redirect("import_sheets", "refresh");
+
     }
 
-    /** Excels methods */
+    // excels methods.
     public function excel()
     {
-        //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->holdings();
-
+        $stocks = $this->Stocktake->holding_excel();
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -1188,12 +1189,8 @@ class Welcome extends CI_Controller
         $sheet->setCellValue('G1', 'Counted Value');
         $sheet->setCellValue('H1', 'Available');
         $sheet->setCellValue('I1', 'Available Value');
-
         $rows = 2;
-        //var_dump($sales);
-
         foreach ($stocks as $val) {
-
             $sheet->setCellValue('A' . $rows, $val->CountingDate);
             $sheet->setCellValue('B' . $rows, $val->itemcode);
             $sheet->setCellValue('C' . $rows, $val->Description);
@@ -1203,26 +1200,23 @@ class Welcome extends CI_Controller
             $sheet->setCellValue('G' . $rows, $val->CountedQty * $val->Cost);
             $sheet->setCellValue('H' . $rows, $val->OriginalQty);
             $sheet->setCellValue('I' . $rows, $val->OriginalQty * $val->Cost);
-
             $rows++;
         }
 
         $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
         $fileName = 'Stock Take'; // set filename for excel file to be exported
-
+        ob_end_clean();
         header('Content-Type: application/vnd.ms-excel'); // generate excel file
         header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
         header('Cache-Control: max-age=0');
-
         $writer->save('php://output');    // download file
+        exit();
     }
 
     /** Synch sheets method */
     public function synchronize()
     {
-        //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->syncstocksheets();
+        $stocks = $this->Stocktake->syncstocksheets_excel();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -1254,27 +1248,23 @@ class Welcome extends CI_Controller
             $sheet->setCellValue('J' . $rows, $val->Username);
             $rows++;
         }
-
         $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
         $fileName = 'Stock Take Progress'; // set filename for excel file to be exported
-
         header('Content-Type: application/vnd.ms-excel'); // generate excel file
         header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
         header('Cache-Control: max-age=0');
-
         $writer->save('php://output');    // download file
     }
 
     /** Counted items in excel**/
     public function countedexcel()
     {
-        //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->stocks();
-
+        $stocks = $this->Stocktake->stocks_excel();
+        if (empty($stocks)) {
+            exit('No data available to export.');
+        }
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
-
         $sheet->setCellValue('A1', 'Date');
         $sheet->setCellValue('B1', 'Code');
         $sheet->setCellValue('C1', 'Description');
@@ -1283,12 +1273,8 @@ class Welcome extends CI_Controller
         $sheet->setCellValue('F1', 'Available Value');
         $sheet->setCellValue('G1', 'Counted Qty');
         $sheet->setCellValue('H1', 'Counted Value');
-
         $rows = 2;
-        //var_dump($sales);
-
         foreach ($stocks as $val) {
-
             $sheet->setCellValue('A' . $rows, $val->CountedDate);
             $sheet->setCellValue('B' . $rows, $val->Code);
             $sheet->setCellValue('C' . $rows, $val->description);
@@ -1297,26 +1283,23 @@ class Welcome extends CI_Controller
             $sheet->setCellValue('F' . $rows, $val->OriginalQty * $val->Cost);
             $sheet->setCellValue('G' . $rows, $val->CountedQty);
             $sheet->setCellValue('H' . $rows, $val->CountedQty * $val->Cost);
-
             $rows++;
         }
-
         $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
-        $fileName = 'Counted SKUs'; // set filename for excel file to be exported
-
+        $fileName = 'Counted_SKUs.xlsx'; // set filename for excel file to be exported
+        ob_end_clean();
         header('Content-Type: application/vnd.ms-excel'); // generate excel file
-        header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $fileName . '"');
         header('Cache-Control: max-age=0');
-
         $writer->save('php://output');    // download file
+        exit();
     }
 
     /**Bin counts report(:shelf)**/
     public function binexcel()
     {
         //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->binsheets();
+        $stocks = $this->Stocktake->binsheets_excel();
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -1365,9 +1348,7 @@ class Welcome extends CI_Controller
     /** Historical stock take excel */
     public function detailsexcel($id)
     {
-        //$fileName = 'sales.xlsx';
-        $stocks = $this->Stocktake->details($id);
-
+        $stocks = $this->Stocktake->excel_details($id);
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 
@@ -1383,9 +1364,7 @@ class Welcome extends CI_Controller
 
         $rows = 2;
         //var_dump($sales);
-
         foreach ($stocks as $val) {
-
             $sheet->setCellValue('A' . $rows, $val->department);
             $sheet->setCellValue('B' . $rows, $val->lookup);
             $sheet->setCellValue('c' . $rows, $val->Alias);
@@ -1395,26 +1374,23 @@ class Welcome extends CI_Controller
             $sheet->setCellValue('G' . $rows, ($val->OriginalQty * $val->Cost));
             $sheet->setCellValue('H' . $rows, $val->CountedQty);
             $sheet->setCellValue('I' . $rows, $val->CountedQty * $val->Cost);
-
             $rows++;
         }
 
         $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-
         $fileName = 'Stocktake"' . $id . '"History'; // set filename for excel file to be exported
-
         header('Content-Type: application/vnd.ms-excel'); // generate excel file
         header('Content-Disposition: attachment;filename="' . $fileName . '.xlsx"');
         header('Cache-Control: max-age=0');
-
         $writer->save('php://output');    // download file
+        redirect(base_url('stocktakedetails/' . $id));
+        exit();
     }
 
     /**Summary History List Excel */
     public function historyexcel()
     {
         $summary = $this->Stocktake->history();
-
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
 

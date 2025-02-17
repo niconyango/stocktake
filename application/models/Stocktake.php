@@ -668,7 +668,7 @@ class Stocktake extends CI_Model
         return $this->db->count_all_results();
     }
 
-    /** Current stock list */
+    // Current stock list
     public function _holdings($search, $order_by, $order_dir, $DepartmentID, $CategoryID, $SubCategoryID)
     {
         $this->db->SELECT('e.`ItemID`,a.`Alias`,e.`ItemLookupCode` as itemcode,e.`Description`,e.`BinLocation` as bin,e.`Price`,e.`Cost`,e.`OriginalQty`,DATE(s.`CountingDate`) as CountingDate,(e.Cost*e.OriginalQty) as availableTotal,(e.Cost*e.CountedQty) as countedTotal,e.`CountedQty`');
@@ -711,6 +711,45 @@ class Stocktake extends CI_Model
         }
         log_message('debug', 'Last Query: ' . $this->db->last_query());
         return $this->db->get()->result();// Fetch filtered and paginated results.
+    }
+
+// stock holding report in excel.
+    public function holding_excel()
+    {
+        $this->db->select('e.`ItemID`,a.`Alias`,e.`ItemLookupCode` as itemcode,e.`Description`,e.`BinLocation` as bin,e.`Price`,e.`Cost`,e.`OriginalQty`,DATE(s.`CountingDate`) as CountingDate,e.`CountedQty`');
+        $this->db->join('`stocktake_entry` e', 's.`ID` = e.`StocktakeID`');
+        $this->db->join('`alias` a', 'a.`ItemID`=e.`ItemID`', 'left');
+        $this->db->where('s.`Status`', 0);
+        $this->db->where('e.`OriginalQty`>=', 0);
+        $this->db->group_by('e.`ItemID`');
+        $this->db->order_by('e.`ItemID`', 'desc');
+
+        $query = $this->db->get('`stocktake` s');
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+    }
+
+    // stock take report excel.
+    public function stocks_excel()
+    {
+        $this->db->select('d.`Name` AS department,c.`Name` AS category,e.`Name` AS subcategory,s.`ItemID` AS ItemID,s.ItemLookupCode AS Code,s.`Description` AS description,s.Cost AS Cost,s.`OriginalQty` AS OriginalQty,s.`CountedQty` AS CountedQty,DATE(s.`CountedDate`) AS CountedDate,a.`Alias`');
+
+        $this->db->join('department d', 'd.`ID`=s.`DepartmentID`', 'left');
+        $this->db->join('category c', 'c.`ID`=s.`CategoryID`', 'left');
+        $this->db->join('subcategory e', 'e.`ID`=s.`SubCategoryID`', 'left');
+        $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'left');
+        $this->db->group_by('s.`ID`');
+        $this->db->where('s.`CountedQty`>', 0);
+        $this->db->where('s.Status', 0);
+
+        $query = $this->db->get('`stocktake_entry` s');
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+
     }
 
     /**  */
@@ -1091,6 +1130,21 @@ class Stocktake extends CI_Model
         return $this->db->get()->result();// Fetch filtered and paginated results.
     }
 
+    // bin sheets excel report.
+    public function binsheets_excel()
+    {
+        $this->db->select("s.`bin` AS bin,s.`ItemLookupCode` AS itemcode,s.`Description`,s.`CountedDate` AS fedtime,i.`Cost`,i.`Price`,s.`Quantity`,s.`Username` AS username ");
+        $this->db->join('`item` i', 'i.`ID`=s.`ItemID`');
+        $this->db->where('s.`Status`', 0);
+        $this->db->order_by('s.`bin`');
+        $query = $this->db->get('`stocksheets` s');
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+    }
+
     // number of skus in the stock sheets.
     public function sheetscount()
     {
@@ -1146,7 +1200,26 @@ class Stocktake extends CI_Model
         return $this->db->get()->result();
     }
 
-    /** Stocktake progress value */
+    // synchronise excel.
+    public function syncstocksheets_excel()
+    {
+        $this->db->select("s.*,a.`Alias`,i.`ItemLookupCode` as ItemCode,i.`Cost`,i.`Price`");
+        $this->db->join('`item` i', 'i.`ID`=s.`ItemID`');
+        $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
+        $this->db->where('s.`Status`', 0);
+        $this->db->group_by('s.`ID`');
+        $this->db->order_by('s.`Quantity`', 'ASC');
+        $this->db->order_by('s.`ID`', 'DESC');
+
+        $query = $this->db->get('`stocksheets` s');
+
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+    }
+
+    // Stocktake progress value
     public function syncstocksheetsval()
     {
         $this->db->select("IFNULL(SUM(i.`Cost`*s.`Quantity`),0) as total");
@@ -1328,12 +1401,28 @@ class Stocktake extends CI_Model
         return $this->db->get()->result();
     }
 
-    /** Getting stock take ID */
+    // historical stock take excel.
+    public function excel_details($id)
+    {
+        $this->db->select("e.`ItemLookupCode` as lookup,a.`Alias`,e.`Description`,d.`Name` AS department,e.`Cost`,e.`OriginalQty`,e.`CountedQty`");
+        $this->db->join('`department` d', 'd.`ID`=e.`DepartmentID`', 'left');
+        $this->db->join('`alias` a', 'a.`ItemID`=e.`ItemID`', 'left');
+        $this->db->where('e.`StocktakeID`', $id);
+        $this->db->where('e.`CountedQty`>', 0);
+        $this->db->group_by('e.`ItemID`');
+        $this->db->order_by('e.`Description`', 'ASC');
+        $query = $this->db->get('`stocktake_entry` e');
+        if ($query->num_rows() > 0) {
+            return $query->result();
+        } else
+            return false;
+    }
+
+    // Getting stock take ID
     public function get_record($id)
     {
         $this->db->where('s.`ID`', $id);
         $query = $this->db->get('`stocktake` s');
-
         if ($query->num_rows() > 0)
             return $query->result();
     }

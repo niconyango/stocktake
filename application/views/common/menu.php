@@ -64,12 +64,12 @@
                                                     class="fad fa-spinner"></i>&nbsp; Feed
                                             Sheets</a>
                                     </li>
-                                    <?php if ($this->session->userdata('SecurityLevel') == 0 || $this->session->userdata('SecurityLevel') == 0) { ?>
-                                        <li class="divider"></li>
-                                        <li><a class="dropdown-item" href="<?php echo base_url('import_sheets'); ?>"><i class="fas
+                                    <li>
+                                        <hr class="dropdown-divider">
+                                    </li>
+                                    <li><a class="dropdown-item" href="<?php echo base_url('import_sheets'); ?>"><i class="fas
                                         fa-file-import"></i>&nbsp;
-                                                Import Sheets</a></li>
-                                    <?php } ?>
+                                            Import Sheets</a></li>
                                 </ul>
                             </li>
                         <?php } ?>
