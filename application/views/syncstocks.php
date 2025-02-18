@@ -30,10 +30,12 @@
                                             the sheets to synch
                                         </button>
                                     <?php } elseif ($pendingsyncrecords != 0 && $tempsheets_status == 0) { ?>
-                                        <button onclick="location.href='<?php echo base_url('sync_stocks'); ?>'" type="button"
-                                                data-bs-backdrop="static" class="btn btn-success pull-left"><i class="fal fa-sync"></i>&nbsp;Sync
-                                            Sheets
+                                        <button type="button" class="btn btn-success pull-left" id="syncButton">
+                                            <i class="fa-thin fa-spinner"></i>&nbsp;Sync Sheets
                                         </button>
+                                        <div id="floatingMessage"
+                                             style="display: none; padding: 10px; color: white; position: relative; top: 40px; right: 10px;
+                                             border-radius: 5px;"></div>
                                     <?php } ?>
                                 <?php } else { ?>
                                     <button type="button" class="btn btn-warning" disabled><i class="fal fa-exclamation-circle"></i>&nbsp;No
@@ -396,6 +398,40 @@
         $('#btn-search').on('click', function () {
             //table.ajax.draw(); // Redraw the table to apply new filters
             table.draw();
+        });
+        document.getElementById('syncButton').addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent default navigation behavior
+
+            // Disable button while syncing
+            const syncButton = document.getElementById('syncButton');
+            syncButton.disabled = true;
+            syncButton.innerHTML = '<i class="fal fa-sync fa-spin"></i>&nbsp;Syncing...';
+
+            fetch("<?php echo base_url('sync_stocks'); ?>", {
+                method: "POST"
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const messageElement = document.getElementById('floatingMessage');
+
+                    messageElement.textContent = data.message;
+                    messageElement.style.display = "block";
+                    messageElement.style.backgroundColor = data.status === "success" ? "green" : "red";
+
+                    // Restore button
+                    syncButton.disabled = true;
+                    syncButton.innerHTML = '<i class="fal fa-sync"></i>&nbsp;Sync Sheets';
+
+                    // Wait 3 seconds, then reload page
+                    setTimeout(() => {
+                        location.reload();
+                    }, 5000);
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    syncButton.disabled = false;
+                    syncButton.innerHTML = '<i class="fal fa-sync"></i>&nbsp;Sync Sheets';
+                });
         });
     });
 

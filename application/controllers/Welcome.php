@@ -2,8 +2,12 @@
 defined('BASEPATH') or exit('No direct script access allowed');
 require FCPATH . '/vendor/autoload.php';
 
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Collection\Memory;
+use PhpOffice\PhpSpreadsheet\Settings;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 
 #[\AllowDynamicProperties]
 class Welcome extends CI_Controller
@@ -29,8 +33,6 @@ class Welcome extends CI_Controller
         parent::__construct();
         //error_reporting(0);
         error_reporting(E_ALL & ~E_DEPRECATED & ~E_WARNING);
-        //ini_set('memory_limit', '1G');
-        ini_set('memory_limit', '512M');
         // $this->load->library("session");
         // $this->load->helper('url');
     }
@@ -914,13 +916,12 @@ class Welcome extends CI_Controller
         switch ($this->session->userdata('logged')) {
             case true:
                 $save = $this->Stocktake->sync_stocks();
-                if ($save == 1) {
-                    echo "Synched successully.";
-                    redirect("syncstocksheets", "refresh");
-                } else {
-                    echo "Error synching.";
-                    redirect("syncstocksheets", "refresh");
-                }
+                // Instead of flashdata, return JSON response for AJAX
+                echo json_encode([
+                    'status' => $save ? 'success' : 'error',
+                    'message' => $save ? 'Data synchronized successfully!' : 'Sync failed. Please try again.'
+                ]);
+                exit;
                 break;
             default:
                 redirect('welcome');
@@ -1206,7 +1207,6 @@ class Welcome extends CI_Controller
             }
         }
         redirect("import_sheets", "refresh");
-
     }
 
     // excels methods.
@@ -1215,44 +1215,51 @@ class Welcome extends CI_Controller
         switch ($this->session->userdata('logged')) {
             case true:
                 $stocks = $this->Stocktake->holdings_excel();
-                
                 if (empty($stocks)) {
                     exit('No data available to export.');
                 }
+                // Increase memory and execution time limits
+                ini_set('memory_limit', '2G');
+                ini_set('max_execution_time', 300);
+                // Enable memory-based caching (prevents high memory usage)
+                Settings::setCache(new Memory());
+
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
-
-                $sheet->setCellValue('A1', 'Stock ');
-                $sheet->setCellValue('B1', 'Code');
-                $sheet->setCellValue('C1', 'Alias');
-                $sheet->setCellValue('D1', 'Description');
-                $sheet->setCellValue('E1', 'Cost');
-                $sheet->setCellValue('F1', 'Price');
-                $sheet->setCellValue('G1', 'Counted');
-                $sheet->setCellValue('H1', 'Counted Value');
-                $sheet->setCellValue('I1', 'Available');
-                $sheet->setCellValue('J1', 'Available Value');
-                $rows = 2;
-                foreach ($stocks as $val) {
-                    $sheet->setCellValue('A' . $rows, $val->CountingDate);
-                    $sheet->setCellValue('B' . $rows, $val->itemcode);
-                    $sheet->setCellValue('C' . $rows, $val->Alias);
-                    $sheet->setCellValue('D' . $rows, $val->Description);
-                    $sheet->setCellValue('E' . $rows, $val->Cost);
-                    $sheet->setCellValue('F' . $rows, $val->Price);
-                    $sheet->setCellValue('G' . $rows, $val->CountedQty);
-                    $sheet->setCellValue('H' . $rows, $val->countedValue);
-                    $sheet->setCellValue('I' . $rows, $val->OriginalQty);
-                    $sheet->setCellValue('J' . $rows, $val->availableValue);
-                    $rows++;
+                // Set headers dynamically
+                $headers = ['StockTake Date', 'Code', 'Alias', 'Description', 'Cost', 'Price', 'Counted', 'Counted Value', 'Available', 'Available Value'];
+                $column = 'A';
+                foreach ($headers as $header) {
+                    $sheet->setCellValue($column . '1', $header);
+                    $column++;
                 }
-                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-                $fileName = 'Current holding.xlsx'; // set filename for excel file to be exported
+                // stream data row by row (avoiding large memory usage)
+                $row = 2;
+                foreach ($stocks as $val) {
+                    $sheet->setCellValueExplicit('A' . $row, $val->CountingDate, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('B' . $row, $val->itemcode, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('C' . $row, $val->Alias, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('D' . $row, $val->Description, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('E' . $row, $val->Cost, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('F' . $row, $val->Price, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('G' . $row, $val->CountedQty, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('H' . $row, $val->countedValue, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('I' . $row, $val->OriginalQty, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('J' . $row, $val->availableValue, DataType::TYPE_NUMERIC);
+                    $row++;
+                    // Flush memory every 10,000 rows
+                    if ($row % 10000 === 0) {
+                        gc_collect_cycles();
+                    }
+                }
+                // Write to output
+                $writer = new Xlsx($spreadsheet);
+                $fileName = 'Current_Holding.xlsx';
                 ob_end_clean();
-                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="' . $fileName . '"');
                 header('Cache-Control: max-age=0');
-                $writer->save('php://output');    // download file
+                $writer->save('php://output');
                 exit();
                 break;
             default:
@@ -1364,35 +1371,55 @@ class Welcome extends CI_Controller
                 if (empty($stocks)) {
                     exit('No data available to export.');
                 }
+
+                // Increase memory and execution time limits
+                ini_set('memory_limit', '2G');
+                ini_set('max_execution_time', 300);
+
                 $spreadsheet = new Spreadsheet();
                 $sheet = $spreadsheet->getActiveSheet();
-                $sheet->setCellValue('A1', 'Date');
-                $sheet->setCellValue('B1', 'Code');
-                $sheet->setCellValue('C1', 'Description');
-                $sheet->setCellValue('D1', 'Cost');
-                $sheet->setCellValue('E1', 'Available Qty');
-                $sheet->setCellValue('F1', 'Available Value');
-                $sheet->setCellValue('G1', 'Counted Qty');
-                $sheet->setCellValue('H1', 'Counted Value');
+
+                // Set headers dynamically
+                $headers = ['StockTake Date', 'Code', 'Alias', 'Description', 'SupplierName', 'Department', 'Category', 'Subcategory',
+                    'Cost', 'Price', 'Quantity', 'Total Cost', 'Total Price'];
+                $column = 'A';
+                foreach ($headers as $header) {
+                    $sheet->setCellValue($column . '1', $header);
+                    $column++;
+                }
+                // Stream data row by row (avoiding large memory usage)
                 $rows = 2;
                 foreach ($stocks as $val) {
-                    $sheet->setCellValue('A' . $rows, $val->CountedDate);
-                    $sheet->setCellValue('B' . $rows, $val->Code);
-                    $sheet->setCellValue('C' . $rows, $val->description);
-                    $sheet->setCellValue('D' . $rows, $val->Cost);
-                    $sheet->setCellValue('E' . $rows, $val->OriginalQty);
-                    $sheet->setCellValue('F' . $rows, $val->OriginalQty * $val->Cost);
-                    $sheet->setCellValue('G' . $rows, $val->CountedQty);
-                    $sheet->setCellValue('H' . $rows, $val->CountedQty * $val->Cost);
+                    $sheet->setCellValueExplicit('A' . $rows, $val->CountedDate, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('B' . $rows, $val->ItemLookupCode, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('C' . $rows, $val->Alias, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('D' . $rows, $val->description, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('E' . $rows, $val->SupplierName, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('F' . $rows, $val->department, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('G' . $rows, $val->category, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('H' . $rows, $val->subcategory, DataType::TYPE_STRING);
+                    $sheet->setCellValueExplicit('I' . $rows, $val->Cost, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('J' . $rows, $val->Price, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('K' . $rows, $val->OriginalQty, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('L' . $rows, $val->availableValue, DataType::TYPE_NUMERIC);
+                    $sheet->setCellValueExplicit('M' . $rows, $val->priceValue, DataType::TYPE_NUMERIC);
+                    //$sheet->setCellValueExplicit('J' . $rows, $val->countedValue, DataType::TYPE_NUMERIC);
                     $rows++;
+
+                    // Flush memory every 10,000 rows
+                    if ($rows % 10000 === 0) {
+                        gc_collect_cycles();
+                    }
                 }
-                $writer = new Xlsx($spreadsheet); // instantiate Xlsx
-                $fileName = 'un_counted_skus.xlsx'; // set filename for excel file to be exported
+
+                // Write to output
+                $writer = new Xlsx($spreadsheet);
+                $fileName = 'un_counted_skus.xlsx';
                 ob_end_clean();
-                header('Content-Type: application/vnd.ms-excel'); // generate excel file
+                header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
                 header('Content-Disposition: attachment;filename="' . $fileName . '"');
                 header('Cache-Control: max-age=0');
-                $writer->save('php://output');    // download file
+                $writer->save('php://output');
                 exit();
                 break;
             default:
