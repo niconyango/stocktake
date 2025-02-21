@@ -736,7 +736,7 @@ class Welcome extends CI_Controller
                     $data[] = [
                         $row->ID,
                         $row->bin,
-                        $row->ItemCode,
+                        $row->ItemLookupCode,
                         $row->Alias,
                         $row->Description,
                         $row->Cost,

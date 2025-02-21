@@ -51,7 +51,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /**Existing sytem users */
+    // Existing sytem users.
     public function system_users()
     {
         $this->db->select('c.`ID`,c.`StoreID`,c.`Number`,l.`Description`,c.`Pass`,c.`PassExpires`,c.`Name`,c.`EmailAddress`,c.`Telephone`,c.`Enabled`,c.`SecurityLevel` AS Security,u.`Name` AS SecurityLevel');
@@ -66,7 +66,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /** User creation method */
+    // User creation method.
     public function user()
     {
         $id = $this->input->post('action');
@@ -86,7 +86,7 @@ class Stocktake extends CI_Model
             $this->db->where('ID', $id);
 
             $query = $this->db->update('`cashier`', $data);
-            //$this->update_edate($id, $data['SupplierID']);
+            // $this->update_edate($id, $data['SupplierID']);
 
             return 2;
         } else {
@@ -99,7 +99,7 @@ class Stocktake extends CI_Model
         }
     }
 
-    /**Loading user levels */
+    // Loading user levels.
     public function userlevels()
     {
         $this->db->select('c.`ID`,c.`Name`');
@@ -111,7 +111,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /**Loding the Branches */
+    // Loding the Branches.
     public function branches()
     {
         $this->db->select('l.`ID`,l.`Description`');
@@ -123,7 +123,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /**Items listings */
+    // Items listings.
     public function items()
     {
         $this->db->select('i.`ItemLookupCode` as Code,d.`Name` AS Department,c.`Name` AS Category,s.`Name` AS SubCategory,a.`Alias`,i.`Description`,i.`Cost`,i.`quantity`,i.`Price`');
@@ -142,7 +142,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /**List of all the suppliers */
+    // List of all the suppliers.
     public function suppliers()
     {
         $this->db->select('s.`ID`,s.`Code`,s.`SupplierName`,s.`ContactName`,s.`City`,s.`Address1`,s.`EmailAddress`,s.`Supplying`,s.`Terms`,s.`PhoneNumber`,s.`TaxNumber`,s.`Address2`,s.`AccountNumber`,s.`Withhold`,s.`TypeofGoods`,s.`Approved`');
@@ -154,7 +154,7 @@ class Stocktake extends CI_Model
         }
     }
 
-    /**List of all the suppliers */
+    // List of all the suppliers.
     public function customers()
     {
         $this->db->select('c.`ID`,c.`AccountNumber`,c.`Company`,c.`EmailAddress`,c.`TaxNumber`,c.`Address`,c.`State`,c.`Title`,CONCAT(c.`FirstName`," ",c.`LastName`) AS ContactPerson,c.`PhoneNumber`,c.`AccountBalance`,c.`Approved`');
@@ -167,7 +167,7 @@ class Stocktake extends CI_Model
         }
     }
 
-    /** Stock sheet method */
+    // Stock sheet method.
     public function transactions()
     {
         $this->db->select("i.`ItemLookupCode`,i.`Description`,d.`Name` as department,l.`Quantity`,c.`Name` AS category,s.`Name` as subcategory,i.`Cost`,i.`Price`,i.`UnitOfMeasure`");
@@ -184,7 +184,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /** Department listings */
+    // Department listings.
     public function users()
     {
         $this->db->order_by('c.`Name`');
@@ -196,7 +196,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /** Checking available stock takes and their current status */
+    // Checking available stock takes and their current status.
     public function stocktakestatus()
     {
         $this->db->select("IFNULL(COUNT(s.`ID`),0) as stocktakestatus");
@@ -212,7 +212,7 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** Getting pending sync records */
+    // Getting pending sync records.
     public function tempsheets_status()
     {
         $this->db->select("IFNULL(COUNT(s.`ID`),0) AS tempsheets_status");
@@ -228,7 +228,7 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** CHecking whether there are records that haven't been synched */
+    // Checking whether there are records that haven't been synched.
     public function pendingsyncrecords()
     {
         $this->db->select("IFNULL(COUNT(s.`ID`),0) AS pendingsynchrecords");
@@ -245,14 +245,13 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** Stock take progress method */
+    // Stock take progress method.
     public function stocktakeprogress()
     {
         $this->db->select("IFNULL(COUNT(t.`ItemID`),0) as stocktakeprogress");
         $this->db->join('`configuration` c', 'c.`StoreID` = s.`StoreID`');
         $this->db->join('`tempsheets` t', 't.`StocktakeID`=s.`ID`');
         $this->db->where('s.`Status`', 0);
-        /** $this->db->WHERE('s.`Status`',0); */
 
         $query = $this->db->get('`stocktake` s');
         if ($query) {
@@ -262,7 +261,7 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** Stock take progress method */
+    // Stock take progress method.
     public function stocktakesheets()
     {
         $this->db->select("IFNULL(COUNT(t.`ItemID`),0) as stocktakesheets");
@@ -278,7 +277,7 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** Department listings */
+    // Department listings.
     public function departments()
     {
         $this->db->select('d.`ID`,d.`Name`,d.`Code`,d.`pMargin`,d.`pComm`');
@@ -291,7 +290,7 @@ class Stocktake extends CI_Model
             return false;
     }
 
-    /** Category listings */
+    // Category listings.
     public function category()
     {
         $this->db->select('c.`ID`,c.`Name` as category');
@@ -1195,7 +1194,7 @@ class Stocktake extends CI_Model
     // Show all the items that are pending synching.
     public function _syncstocksheets($search, $order_by, $order_dir, $LookupCode)
     {
-        $this->db->select("s.ID,s.Description,s.bin,s.Username,s.Quantity,a.`Alias`,i.`ItemLookupCode` as ItemCode,i.`Cost`,(s.Quantity*i.Cost) as costValue,i.`Price`,(i.`Price`*s.`Quantity`) as priceValue");
+        $this->db->select("s.ID,s.Description,s.bin,s.Username,s.Quantity,a.`Alias`,i.`ItemLookupCode`,i.`Cost`,(s.Quantity*i.Cost) as costValue,i.`Price`,(i.`Price`*s.`Quantity`) as priceValue");
         $this->db->from('`stocksheets` s');
         $this->db->join('`item` i', 'i.`ID`=s.`ItemID`');
         $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
@@ -1204,6 +1203,7 @@ class Stocktake extends CI_Model
 
         if ($LookupCode != "") {
             $this->db->where('s.`ItemLookupCode`', $LookupCode);
+            $this->db->or_where('a.Alias', $LookupCode);
         }
 
         if (!empty($search)) {
