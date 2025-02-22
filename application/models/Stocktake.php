@@ -407,7 +407,7 @@ class Stocktake extends CI_Model
         // Fetch stock take ID
         $StockTakeID = $this->db->query("SELECT s.`ID` AS StockTakeID FROM `stocktake` s WHERE s.`Status` = 0")->row()->StockTakeID;
         // Insert into physicalinventoryentry
-        $this->db->query("INSERT INTO `physicalinventoryentry` (`StoreID`, `PhysicalInventoryID`, `ReasonCodeID`, `CountTime`, `ItemID`, `BinLocation`, `Price`, `Cost`, `QuantityCounted`, `QuantityAdjusted`, `QuantityRefreshed`)  SELECT e.`StoreID`, '$physical', 97, e.`CountedDate`, e.`ItemID`, e.`BinLocation`, e.`Price`, e.`Cost`, e.`CountedQty`, c.Quantity, e.`CountedQty` FROM `stockshets_complete`c join  `stocktake_entry` e on e.ItemID=c.ItemID WHERE e.`Status` = 0 and e.StockTakeID=c.StocktakeID AND e.`StocktakeID` = '$StockTakeID'");
+        $this->db->query("INSERT `physicalinventoryentry`(`StoreID`,`PhysicalInventoryID`,`ReasonCodeID`,`CountTime`,`ItemID`,`BinLocation`,`Price`,`Cost`,`QuantityCounted`,`QuantityAdjusted`,`QuantityRefreshed`) SELECT e.`StoreID`,'$physical',97 AS ReasonCodeID,`CountedDate`,e.`ItemID`,e.`BinLocation`,e.`Price`,e.`Cost`,e.`CountedQty` AS QuantityCounted,(e.`QtyDiff`) AS QuantityAdjusted,e.`CountedQty` AS QuantityRefreshed FROM `stocktake_entry`e WHERE e.`Status`= 0 AND e.`StocktakeID`='$StockTakeID' AND e.`QtyDiff`<>0 ");
         // Update stock quantities in the item table
         $this->db->query("UPDATE `item` i JOIN `stockshets_complete` e ON e.`ItemID` = i.`ID` SET i.`quantity` = e.`Quantity` WHERE e.`Status` = 0 AND e.`StocktakeID` = '$StockTakeID'");
         // Update stock quantities in inventorylocationitems table
@@ -443,7 +443,7 @@ class Stocktake extends CI_Model
         // Insert into physicalinventoryentry
         $this->db->query("INSERT INTO physicalinventoryentry (StoreID, PhysicalInventoryID, ReasonCodeID, CountTime, ItemID, BinLocation, Price, Cost, QuantityCounted, QuantityAdjusted, QuantityRefreshed) SELECT e.StoreID, ?, 97, e.CountedDate, e.ItemID, e.BinLocation, e.Price, e.Cost, e.CountedQty, e.QtyDiff, e.CountedQty FROM stocktake_entry e WHERE e.Status = 0 AND e.StocktakeID = ? AND e.QtyDiff != 0 AND e.CountedDate IS NOT NULL", [$physical, $StockTakeID]);
         // Update item stock quantities
-        $this->db->query("UPDATE item i JOIN stocktake_entry e ON e.ItemID = i.ID SET i.quantity = i.quantity + e.QtyDiff WHERE e.Status = 0 AND e.CountedDate IS NOT NULL AND e.StocktakeID = ?", [$StockTakeID]);
+        $this->db->query("UPDATE item i JOIN stocktake_entry e ON e.ItemID = i.ID SET i.quantity = (i.quantity + e.QtyDiff) WHERE e.Status = 0 AND e.CountedDate IS NOT NULL AND e.StocktakeID = ?", [$StockTakeID]);
         // Update inventory location items
         $this->db->query("UPDATE inventorylocationitems l JOIN item i ON i.ID = l.ItemDBID SET l.Quantity = i.quantity WHERE l.InventoryLocation IN (SELECT StoreID FROM configuration)");
         // Close the stock take
