@@ -54,7 +54,8 @@
                                                     </select>
                                                 </div>
                                                 <div class="form-group col-md-2">
-                                                    <button type="button" class="btn btn-success btn-search" id="btn-search"><i class="fas
+                                                    <button type="button" class="btn btn-success btn-search"
+                                                            id="btn-search"><i class="fas
                                                     fa-search"></i>&nbsp;
                                                         Search
                                                     </button>
@@ -65,10 +66,12 @@
                                 </div>
                             </div>
                             <div class="col-4">
-                                <a class="btn btn-success float-end" href="<?php echo base_url('uncounted_excel'); ?>"><i class="fad
+                                <a class="btn btn-success float-end"
+                                   href="<?php echo base_url('uncounted_excel'); ?>"><i class="fad
                             fa-file-excel"></i>&nbsp; Export Excel</a>
                                 <a class="btn btn-danger float-end" style="margin-right: 5px;" target="_blank"
-                                   href="<?php echo base_url('pdf'); ?>"><i class="fal fa-file-pdf"></i>&nbsp; Export PDF</a>
+                                   href="<?php echo base_url('pdf'); ?>"><i class="fal fa-file-pdf"></i>&nbsp; Export
+                                    PDF</a>
                             </div>
                         </div><!-- /.box-header -->
                     </div>
@@ -108,7 +111,7 @@
 <script type="text/javascript">
     $(document).ready(function () {
         $('.btn-items').click(function () {
-            /** alert('Test '+ $(this).attr('entry')) */
+            // alert('Test '+ $(this).attr('entry'))
             var id = $(this).attr('entry');
             var url = "<?php echo base_url('product'); ?>";
 
@@ -118,8 +121,6 @@
                 url: url,
                 success: function (data) {
                     var result = $.parseJSON(data);
-
-
                     var table = "";
                     var i = 1;
 

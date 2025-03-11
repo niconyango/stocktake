@@ -16,10 +16,10 @@
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="navbar-collapse">
                     <ul class="navbar-nav ms-auto">
+                        <li class="nav-item active"><a class="nav-link" href="<?php echo base_url('dashboard'); ?>"><i
+                                        class="far fa-chart-network"></i>&nbsp;<span>Dashboard</span>
+                            </a></li>
                         <?php if ($this->session->userdata('SecurityLevel') == 19 || $this->session->userdata('SecurityLevel') == 5) { ?>
-                            <li class="nav-item active"><a class="nav-link" href="<?php echo base_url('dashboard'); ?>"><i
-                                            class="far fa-chart-network"></i>&nbsp;<span>Dashboard</span>
-                                </a></li>
                             <li class="nav-item"><a class="nav-link" href="<?php echo base_url('fstocks'); ?>"><i
                                             class="fal fa-play-circle"></i><span>&nbsp;Freeze Stocks</span></a></li>
                         <?php } ?>

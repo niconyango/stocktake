@@ -19,156 +19,96 @@
                     <div class="col-12">
                         <div class="row">
                             <div class="col-2">
-                                <?php
-                                if ($stocktakestatus != 0) { ?>
-                                    <?php if ($tempsheets_status == 0 && $pendingsyncrecords == 0) { ?>
-                                        <button type="button" class="btn btn-warning" disabled><i class="fal fa-ban"></i>&nbsp;No Sheets to
-                                            synch.
-                                        </button>
-                                    <?php } elseif ($tempsheets_status != 0 && ($pendingsyncrecords == 0 || $pendingsyncrecords != 0)) { ?>
-                                        <button type="button" class="btn btn-warning" disabled><i class="fal fa-exclamation-circle"></i>&nbsp;Save
-                                            the sheets to synch
-                                        </button>
-                                    <?php } elseif ($pendingsyncrecords != 0 && $tempsheets_status == 0) { ?>
-                                        <button type="button" class="btn btn-success pull-left" id="syncButton">
-                                            <i class="fa-thin fa-spinner"></i>&nbsp;Sync Sheets
-                                        </button>
-                                        <div id="floatingMessage"
-                                             style="display: none; padding: 10px; color: white; position: relative; top: 40px; right: 10px;
-                                             border-radius: 5px;"></div>
-                                    <?php } ?>
+                                <?php if ($pendingsyncrecords == 0) { ?>
+                                    <button type="button" class="btn btn-warning" disabled><i class="fal fa-ban"></i>&nbsp;No
+                                        Sheets to
+                                        synch.
+                                    </button>
                                 <?php } else { ?>
-                                    <button type="button" class="btn btn-warning" disabled><i class="fal fa-exclamation-circle"></i>&nbsp;No
-                                        stock Take in Progress.
+                                    <button type="button" class="btn btn-success pull-left" id="syncButton">
+                                        <i class="fa-thin fa-spinner"></i>&nbsp;Sync Sheets
                                     </button>
                                 <?php } ?>
+                                <div id="floatingMessage"
+                                     style="display: none; padding: 10px; color: white; position: relative; top: 40px; right: 10px;
+                                             border-radius: 5px;"></div>
                             </div>
-                            <?php
-                            if ($tempsheets_status != 0 && ($pendingsyncrecords == 0 || $pendingsyncrecords != 0)) { ?>
-                                <div class="col-6">
-                                    <h3 class="box-title"
-                                        style="font-weight: bolder;font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;">
-                                        Pending Bins</h3>
-                                </div>
-                            <?php } else { ?>
-                                <div class="col-6">
-                                    <div class="row">
-                                        <div class="col-5">
-                                            <div class="col-md-12">
-                                                <form role="form" method="post">
-                                                    <div class="row">
-                                                        <!-- item look up  -->
-                                                        <div class="form-group col-md-6">
-                                                            <input type="text" name="LookupCode" id="lookupcode" autocomplete="off"
-                                                                   required=""
-                                                                   class="form-control" placeholder="ItemLookupCode"/>
-                                                        </div><!-- /.input group -->
-                                                        <div class="form-group col-md-6">
-                                                            <button type="button" class="btn btn-success btn-search" id="btn-search"><i
-                                                                        class="fas
-                                                    fa-search"></i>&nbsp;Search
-                                                            </button>
-                                                        </div>
+                            <div class="col-6">
+                                <div class="row">
+                                    <div class="col-5">
+                                        <div class="col-md-12">
+                                            <form role="form" id="item-search" method="post">
+                                                <div class="row">
+                                                    <!-- item look up  -->
+                                                    <div class="form-group col-md-8">
+                                                        <input type="text" name="LookupCode" id="lookupcode"
+                                                               autocomplete="off" required=""
+                                                               class="form-control" placeholder="ItemLookupCode"/>
+                                                    </div><!-- /.input group -->
+                                                    <div class="form-group col-md-4">
+                                                        <button type="button" class="btn btn-success btn-search"
+                                                                id="btn-search"><i class="fas
+                                                                    fa-search"></i>&nbsp;Search
+                                                        </button>
                                                     </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                        <div class="col-1">
-                                            <h4 class="text-black"><strong>VALUE:&nbsp;<?php echo number_format($total, 2); ?></strong></h4>
+                                                </div>
+                                            </form>
                                         </div>
                                     </div>
+                                    <div class="col-1">
+                                        <h4 class="text-black">
+                                            <strong>VALUE:&nbsp;<?php echo number_format($total, 2); ?></strong>
+                                        </h4>
+                                    </div>
                                 </div>
-                            <?php } ?>
+                            </div>
                             <div class="col-4">
                                 <a class="btn btn-success float-end" href="<?php echo base_url('synchronize'); ?>"><i
                                             class="fal fa-file-excel"></i>&nbsp; Export Excel</a>
                                 <a class="btn btn-danger float-end" style="margin-right: 5px;" target="_blank"
-                                   href="<?php echo base_url('pdf'); ?>"><i class="fas fa-file-pdf"></i>&nbsp; Export PDF</a>
+                                   href="<?php echo base_url('pdf'); ?>"><i class="fas fa-file-pdf"></i>&nbsp; Export
+                                    PDF</a>
                             </div>
                         </div><!-- /.box-header -->
                     </div>
                 </div>
-                <?php
-                if ($tempsheets_status != 0 && ($pendingsyncrecords == 0 || $pendingsyncrecords != 0)) { ?>
-                    <div class="box-body">
-                        <table id="pendindsheets" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>StockTake #</th>
-                                <th>Bin</th>
-                                <th class="text-end">Cost Value</th>
-                                <th class="text-end">Price Value</th>
-                                <th>Data Clerk</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <?php
+                <div class="box-body">
+                    <table id="sheets" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>User</th>
+                            <th>Bin/(Shelf):</th>
+                            <th>Lookup Code</th>
+                            <th>Alias</th>
+                            <th>Description</th>
+                            <th class="text-end">Cost</th>
+                            <th class="text-end">Price</th>
+                            <th class="text-end">Counted Qty</th>
+                            <th class="text-end">Total Cost</th>
+                            <th class="text-end">Total Price</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody>
 
-                            if (!empty($pendings)) {
-                                $i = 1;
-                                foreach ($pendings as $row) {
-
-                                    ?>
-                                    <tr>
-                                        <td><?php echo $i; ?></td>
-                                        <td><a href="#" class="text-decoration-none btn-skus" data-bs-target="#pending_sheets"
-                                               data-toggle="modal"
-                                               user="<?php echo $row->UserID; ?>"><?php echo $row->StocktakeID; ?></a></td>
-                                        <td><a href="#" class="text-decoration-none btn-skus" data-bs-target="#pending_sheets"
-                                               data-toggle="modal"
-                                               user="<?php echo $row->UserID; ?>"><?php echo $row->bin; ?></a></td>
-                                        <td class="text-end"><?php echo number_format($row->costvalue, 2); ?></td>
-                                        <td class="text-end"><?php echo number_format($row->pricevalue, 2); ?></a></td>
-                                        <td><?php echo $row->user; ?></td>
-                                    </tr>
-                                    <?php
-                                    $i++;
-                                }
-                            }
-                            ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php } else { ?>
-                    <div class="box-body">
-                        <table id="sheets" class="table table-bordered table-striped">
-                            <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>User</th>
-                                <th>Bin/(Shelf):</th>
-                                <th>Lookup Code</th>
-                                <th>Alias</th>
-                                <th>Description</th>
-                                <th class="text-end">Cost</th>
-                                <th class="text-end">Price</th>
-                                <th class="text-end">Counted Qty</th>
-                                <th class="text-end">Total Cost</th>
-                                <th class="text-end">Total Price</th>
-                                <th>Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                            <tfoot>
-                            <tr>
-                                <th colspan="8">Totals</th>
-                                <th class="text-end"></th>
-                                <th class="text-end"></th>
-                            </tr>
-                            </tfoot>
-                        </table>
-
-                    </div><!-- /.box-body -->
-                <?php } ?>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th colspan="8">Totals</th>
+                            <th class="text-end"></th>
+                            <th class="text-end"></th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div><!-- /.box-body -->
             </div><!-- /.box -->
         </div><!-- /.row -->
     </section><!-- /.content -->
 </div><!-- /.content-wrapper -->
 <!--Item detail modal-->
-<div class="modal modal-default" id="details-modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false"
+<div class="modal modal-default" id="details-modal" tabindex="-1" role="dialog" data-bs-backdrop="static"
+     data-bs-keyboard="false"
      aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-default">
         <div class="modal-content">
@@ -183,26 +123,30 @@
                         <label>Shelf/Bin Number:</label>
                         <input type="text" name="bin" id="bin" autocomplete="off" class="form-control"
                                required readonly/>
+                        <input type="hidden" name="StockTakeID" id="StockTakeID" autocomplete="off" class="form-control"
+                               required readonly/>
+                        <input type="hidden" name="user" id="user" autocomplete="off" class="form-control"
+                               required readonly/>
                     </div><!-- /.form group -->
                     <div class="row">
                         <!-- Item Code details -->
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-4">
                             <label>Item LookupCode:</label>
                             <input type="text" name="item_code" id="item_code" autocomplete="off" class="form-control"
                                    placeholder="Code" required readonly/>
                         </div><!-- /.input group -->
                         <!--Item description -->
-                        <div class="mb-3 col-md-6">
+                        <div class="mb-3 col-md-8">
                             <label>Description:</label>
-                            <input type="text" name="item_details" id="item_details" autocomplete="off" class="form-control"
-                                   required readonly/>
+                            <input type="text" name="item_details" id="item_details" autocomplete="off"
+                                   class="form-control" required readonly/>
                         </div><!-- /.form group -->
                     </div><!-- /.form group -->
                     <!-- shelf/(bin) count -->
                     <div class="mb-3">
                         <label>Counted Stock:</label>
-                        <input type="text" name="quantity" id="quantity" onkeypress="return isNumberKey(event)" autocomplete="off"
-                               class="form-control" placeholder="0.00" required/>
+                        <input type="text" name="quantity" id="quantity" onkeypress="return isNumberKey(event)"
+                               autocomplete="off" class="form-control" placeholder="0.00" required/>
                     </div><!-- /.input group -->
                 </form>
             </div>
@@ -269,6 +213,8 @@
             //var bin = $(this).attr('bin')
             $("#action").val($(this).attr('data-id'));
             $("#bin").val($(this).attr('shelf'));
+            $("#StockTakeID").val($(this).attr('stocktake'));
+            $("#user").val($(this).attr('username'));
             $("#item_code").val($(this).attr('itemcode'));
             $("#item_details").val($(this).attr('description'));
             $("#quantity").val($(this).attr('quantity'));
@@ -285,6 +231,7 @@
             "pageLength": 10,
             "deferRender": true,
             "processing": true,
+            "ordering": true,  // <-- Explicitly enable ordering
             // Get the selected column for filtering
             "ajax": {
                 url: "<?php echo base_url('fetch_entries');?>",
@@ -342,25 +289,20 @@
                         }
                     },
                     {
-                        data: null, // No direct data source
-                        render: function (data, type, row) {
-                            // Add edit button with row ID
-                            let editButton = `<button class="btn btn-sm btn-warning btn-edit" data-id="${row[0]}" shelf="${row[1]}"
-                            itemcode="${row[2]}" description="${row[4]}" quantity="${row[7]}"><i class="fa-thin fa-pen-to-square"></i> Edit</button>`;
+                        "data": null, "orderable": true, // Disable ordering for action buttons
+                        "render": function (data, type, row) {
+                            let editButton = `<button class="btn btn-sm btn-warning btn-edit" data-id="${row[0]}"
+                            shelf="${row[1]}" itemcode="${row[2]}" description="${row[4]}" quantity="${row[7]}"
+                            username="${row[10]}" stocktake="${row[11]}"><i class="fa-thin
+                            fa-pen-to-square"></i>Edit</button>`;
                             let deleteButton = `<a class="btn btn-sm btn-danger" href="<?php echo base_url() ?>del_sheet_entry/${data[0]}"><i class="far fa-trash"></i>&nbsp;&nbsp; Delete</a>`;
                             let blockedButton = `<button class="btn btn-sm btn-danger btn-edit disabled"><i class="fa-thin fa-ban"></i> Restricted</button>`;
-                            if (userlevel == 5 || userlevel == 19) {
-                                return editButton + ' ' + deleteButton;
-                            } else {
-                                return blockedButton;
-                            }
+                            return (userlevel == 5 || userlevel == 19) ? editButton + ' ' + deleteButton : blockedButton;
                         }
                     }
                 ],
-            "order":
-                [{
-                    "column": 0, "dir": "asc"
-                }], footerCallback: function (row, data, start, end, display) {
+            "order": [[0, "asc"]], // Default ordering by first column (change as needed)
+            footerCallback: function (row, data, start, end, display) {
                 // Calculate total cost
                 var api = this.api();
                 // currency formating.

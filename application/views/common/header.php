@@ -10,6 +10,8 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <!-- chart js  -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
     <!-- Bootstrap 5.3.3 -->
     <link href="<?php echo base_url() ?>assets/bootstrap-5.3.3/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
     <!-- Font Awesome Icons -->

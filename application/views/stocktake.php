@@ -81,7 +81,8 @@
                             <div class="mb-3">
                                 <label>Reason:</label>
                                 <div class="input-group my-colorpicker2">
-                                    <input type="text" name="reasoncode" id="reasoncode" value="<?php echo $reason; ?>" autocomplete="off"
+                                    <input type="text" name="reasoncode" id="reasoncode" value="<?php echo $reason; ?>"
+                                           autocomplete="off"
                                            class="form-control" readonly required/>
                                     <div class="input-group-addon">
                                         <i></i>
@@ -91,8 +92,20 @@
                             <div class="mb-3">
                                 <label>Shelf/Bin Number:</label>
                                 <div class="input-group my-colorpicker2">
-                                    <input type="text" name="bin" id="bin" value="<?php echo $shelf; ?>" autocomplete="off"
-                                           class="form-control" required/>
+                                    <!--                                    <input type="text" name="bin" id="bin" value="-->
+                                    <?php //echo $shelf; ?><!--"-->
+                                    <!--                                           autocomplete="off"-->
+                                    <!--                                           class="form-control" required/>-->
+                                    <select class="form-select" name="bin" id="bin" required>
+                                        <option value="" <?= !isset($shelf) ? 'selected' : '' ?>>Select Bin</option>
+                                        <option value="SHOP" <?= (isset($shelf) && $shelf == 'SHOP') ? 'selected' : '' ?>>
+                                            SHOP
+                                        </option>
+                                        <option value="STORE" <?= (isset($shelf) && $shelf == 'STORE') ? 'selected' : '' ?>>
+                                            STORE
+                                        </option>
+                                    </select>
+
                                     <div class="input-group-addon">
                                         <i></i>
                                     </div>
@@ -102,7 +115,8 @@
                             <div class="mb-3">
                                 <label>Item LookupCode:</label>
                                 <div class="input-group my-colorpicker2">
-                                    <input type="text" name="item_code" id="item_code" autocomplete="off" class="form-control"
+                                    <input type="text" name="item_code" id="item_code" autocomplete="off"
+                                           class="form-control"
                                            placeholder="Code" required/>
                                     <div class="input-group-addon">
                                         <i></i>
@@ -114,7 +128,8 @@
                                 <div class="mb-3">
                                     <label>Counted Stock:</label>
                                     <div class="input-group">
-                                        <input type="text" name="quantity" id="quantity" onkeypress="return isNumberKey(event)"
+                                        <input type="text" name="quantity" id="quantity"
+                                               onkeypress="return isNumberKey(event)"
                                                autocomplete="off" class="form-control" placeholder="0.00" required/>
                                         <div class="input-group-addon">
                                             <i></i>
@@ -127,7 +142,8 @@
                                 <div class="mb-3">
                                     <label>Description:</label>
                                     <div class="input-group">
-                                        <input type="text" name="item_details" id="item_details" autocomplete="off" class="form-control"
+                                        <input type="text" name="item_details" id="item_details" autocomplete="off"
+                                               class="form-control"
                                                required readonly/>
                                         <div class="input-group-addon">
                                             <i></i>
@@ -146,7 +162,8 @@
                 <div class="box box-primary">
                     <div class="box-header">
                         <h3 class="box-title">Sheet Details</h3>
-                        <button onclick="location.href='<?php echo base_url('post_sheets'); ?>'" type="button" data-bs-backdrop="static"
+                        <button onclick="location.href='<?php echo base_url('post_sheets'); ?>'" type="button"
+                                data-bs-backdrop="static"
                                 class="btn btn-primary btn-flat float-end" style="border-radius: 5px;"><i class="fad
                                 fa-file-upload"></i>&nbsp;
                             Save Sheet
@@ -180,13 +197,17 @@
                                         <td><?php echo $row->CashierName; ?></a></td>
                                         <td>
                                             <button class="btn btn-sm btn-warning btn-edit" id="<?php echo $row->ID; ?>"
-                                                    itemid="<?php echo $row->ItemID; ?>" itemcode="<?php echo $row->ItemLookupCode; ?>"
-                                                    description="<?php echo $row->Itemdescription; ?>" shelf="<?php echo $row->Shelf; ?>"
-                                                    quantity="<?php echo $row->Quantity; ?>" cashier="<?php echo $row->CashierName; ?>"><i
+                                                    itemid="<?php echo $row->ItemID; ?>"
+                                                    itemcode="<?php echo $row->ItemLookupCode; ?>"
+                                                    description="<?php echo $row->Itemdescription; ?>"
+                                                    shelf="<?php echo $row->Shelf; ?>"
+                                                    quantity="<?php echo $row->Quantity; ?>"
+                                                    cashier="<?php echo $row->CashierName; ?>"><i
                                                         class="fal fa-edit"></i>&nbsp;Edit
                                             </button>
                                             <a class="btn btn-sm btn-danger"
-                                               href="<?php echo base_url() ?>remove/<?php echo $row->ID; ?>"><i class="far fa-trash"></i>&nbsp;Remove</a>
+                                               href="<?php echo base_url() ?>remove/<?php echo $row->ID; ?>"><i
+                                                        class="far fa-trash"></i>&nbsp;Remove</a>
                                         </td>
                                     </tr>
                                     <?php
@@ -216,7 +237,8 @@
 
     </section><!-- /.content -->
 </div><!-- /.content-wrapper -->
-<div class="modal modal-default" id="codeupdate-modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false"
+<div class="modal modal-default" id="codeupdate-modal" tabindex="-1" role="dialog" data-bs-backdrop="static"
+     data-bs-keyboard="false"
      aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -228,18 +250,21 @@
                 <h4 style="text-align:center">The item has already been entered in the current sheet.</h4><br/>
             </div>
             <div class="modal-footer">
-                <button onclick="location.href='<?php echo base_url(); ?>cancelcode'" class="btn btn-flat btn btn-outline pull-left"><i
+                <button onclick="location.href='<?php echo base_url(); ?>cancelcode'"
+                        class="btn btn-warning float-start"><i
                             class="far fa-times-circle"></i>&nbsp;&nbsp; Cancel
                 </button>
 
-                <button class="btn btn-primary" onclick="location.href='<?php echo base_url(); ?>updatecode'" type="button"><i
+                <button class="btn btn-primary" onclick="location.href='<?php echo base_url(); ?>updatecode'"
+                        type="button"><i
                             class="far fa-check-circle"></i>&nbsp; Add
                 </button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
-<div class="modal modal-default" id="bin-modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false"
+<div class="modal modal-default" id="bin-modal" tabindex="-1" role="dialog" data-bs-backdrop="static"
+     data-bs-keyboard="false"
      aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -251,7 +276,8 @@
                 <h4 style="text-align:center">Please first set the Bin before you continue.</h4><br/>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="far fa-times-circle"></i>&nbsp;
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i
+                            class="far fa-times-circle"></i>&nbsp;
                     Cancel
                 </button>
             </div>
@@ -259,7 +285,8 @@
     </div><!-- /.modal-dialog -->
 </div><!-- /.modal -->
 <!-- Warning on entries more than 10-->
-<div class="modal modal-default" id="entries-modal" tabindex="-1" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false"
+<div class="modal modal-default" id="entries-modal" tabindex="-1" role="dialog" data-bs-backdrop="static"
+     data-bs-keyboard="false"
      aria-labelledby="myModalLabel">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
@@ -268,10 +295,12 @@
                 <h4 class="modal-title">Warning</h4>
             </div>
             <div class="mb-3 col-md-12">
-                <h4 style="text-align:center">Maximum sheet entries reached, please save the sheet to continue.</h4><br/>
+                <h4 style="text-align:center">Maximum sheet entries reached, please save the sheet to continue.</h4>
+                <br/>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i class="far fa-times-circle"></i>&nbsp;
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal"><i
+                            class="far fa-times-circle"></i>&nbsp;
                     Cancel
                 </button>
             </div>
@@ -314,11 +343,15 @@
         }
     });
     var currentBoxNumber = 0;
+
     $("#quantity").keyup(function (event) {
         if (event.keyCode == 13) {
-
             var url = "<?php echo base_url('stock_take'); ?>";
             var data = $("#stock-form").serialize();
+
+            // Disable input to prevent double entry
+            $("#quantity").prop("disabled", true);
+
             $.ajax({
                 type: "POST",
                 async: true,
@@ -327,11 +360,14 @@
                 success: function (data) {
                     $("#res").html(data).show().addClass("alert-success");
 
+                    // Optional: Refresh page if needed
                     location.reload();
-
+                },
+                complete: function () {
+                    // Re-enable input after the request is done
+                    $("#quantity").prop("disabled", false);
                 }
-
-            })
+            });
         }
     });
 

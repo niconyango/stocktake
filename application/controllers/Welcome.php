@@ -121,6 +121,7 @@ class Welcome extends CI_Controller
             $data['config'] = $this->Stocktake->storeconfig();
             $data['progress'] = $this->Stocktake->sheetprogress();
             //$data['department'] = $this->Stocktake->departmentalprogress();
+            $data['total'] = $this->Stocktake->syncstocksheetsval();
 
             $this->load->view('common/header', $data);
             $this->load->view('common/menu');
@@ -744,7 +745,8 @@ class Welcome extends CI_Controller
                         $row->Quantity,
                         $row->costValue,
                         $row->priceValue,
-                        $row->Username
+                        $row->Username,
+                        $row->StocktakeID
                     ];
                 }
                 //return json response
@@ -823,6 +825,8 @@ class Welcome extends CI_Controller
                     $this->session->set_flashdata('missing', 'Code doesn\'t exist.');
                 } else if ($save == 4) {
                     $this->session->set_flashdata('adding', 'Quantity updated successully.');
+                } else if ($save == 7) {
+                    $this->session->set_flashdata('error', 'User not logged in or invalid session');
                 } else if ($save == 8) {
                     $this->session->set_flashdata('bin', 'Set the bin');
                 } else if ($save == 9) {

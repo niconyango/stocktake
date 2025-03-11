@@ -499,7 +499,7 @@ class Stocktake extends CI_Model
     public function stockscount()
     {
         $this->db->where('s.Status', 0);
-        return $this->db->count_all('`stocktake_entry` s');
+        return $this->db->count_all_results('`stocktake_entry` s');
     }
 
     // Records filter counts.
@@ -808,11 +808,11 @@ class Stocktake extends CI_Model
         return false;
     }
 
-    /** Synchronise stock take details */
+    // Synchronise stock take details.
     public function sync_stocks()
     {
-        $this->db->trans_start(); // Start transaction
-        // Get count of remaining entries in tempsheets
+        $this->db->trans_start(); // Start transaction.
+        // Get count of remaining entries in tempsheets.
         $left_entries = $this->db->select('COUNT(t.ID) AS left_entries')
             ->from('tempsheets t')
             ->join('stocktake s', 's.ID = t.StocktakeID')
@@ -823,35 +823,42 @@ class Stocktake extends CI_Model
             ->left_entries;
 
         if ($left_entries == 0) {
-            // Fetch active stocktake ID and counting date
+            // Fetch active stocktake ID and counting date.
             $query = $this->db->select('ID AS stocktakeid, CountingDate')
                 ->where('Status', 0)
                 ->get('stocktake');
 
             if ($query->num_rows() == 0) {
-                $this->db->trans_complete(); // Ensure transaction is closed
-                return false; // No active stocktake found
+                $this->db->trans_complete(); // Ensure transaction is closed.
+                return false; // No active stocktake found.
             }
 
             $row = $query->row();
             $stocktakeid = $row->stocktakeid;
             $CountingDate = $row->CountingDate;
-            // Delete stocktake_entry records before syncing
+
+            // Securely fetch min_entry ID for stocktake_entry
+            $querye = $this->db->select_min('ID', 'min_entry')
+                ->where('StocktakeID', $stocktakeid)
+                ->get('stocktake_entry');
+
+            $min_entry = ($querye->num_rows() > 0 && $querye->row()->min_entry) ? $querye->row()->min_entry : 1; // Default to 1 if no entries exist
+            // Delete stocktake_entry records before syncing.
             $this->db->where('StocktakeID', $stocktakeid)->delete('stocktake_entry');
-            // Insert all missing SKU records in stocktake_entry using parameterized query
+            // Insert all missing SKU records in stocktake_entry using parameterized query.
             $insert_query = "INSERT INTO stocktake_entry (StocktakeID, StoreID, DepartmentID, CategoryID, SubCategoryID, ItemID, ItemLookupCode, Description, BinLocation, tDate, OriginalQty, Lastupdated, Cost, Price) SELECT ?, c.StoreID, IFNULL(i.DepartmentID, 0), IFNULL(i.CategoryID, 0), IFNULL(i.SubCategoryID, 0), i.ID, i.ItemLookupCode, i.Description, BinLocation, ?, l.Quantity, NOW(), i.Cost, i.Price FROM item i JOIN inventorylocationitems l ON l.ItemDBID = i.ID JOIN  configuration c ON c.StoreID = l.InventoryLocation";
             $this->db->query($insert_query, [$stocktakeid, $CountingDate]);
-            // Clear stocksheets_complete before syncing
+            // Clear stocksheets_complete before syncing.
             $this->db->truncate('stockshets_complete'); // Use truncate for better performance
-            // Insert aggregated stocktake records into stocksheets_complete
+            // Insert aggregated stocktake records into stocksheets_complete.
             $aggregate_query = "INSERT INTO stockshets_complete (StocktakeID, ItemID, Quantity, Status) SELECT e.StocktakeID, e.ItemID, IFNULL(SUM(e.Quantity), 0), e.Status FROM stocksheets e WHERE e.Status = 0 GROUP BY e.ItemID ORDER BY e.ItemID";
             $this->db->query($aggregate_query);
 
-            // Update counts in stocktake_entry
+            // Update counts in stocktake_entry.
             $update_query = "UPDATE stocktake_entry s JOIN stockshets_complete c ON c.ItemID = s.ItemID SET s.CountedQty = c.Quantity, s.Lastupdated = NOW(), s.CountedDate = NOW() WHERE s.Status = 0 AND s.ItemID IN (SELECT DISTINCT ItemID FROM stocksheets)";
             $this->db->query($update_query);
 
-            // Update quantity difference in stocktake_entry
+            // Update quantity difference in stocktake_entry.
             $this->db->set('QtyDiff', 'IFNULL(CountedQty - OriginalQty, 0)', FALSE)
                 ->set('Lastupdated', 'NOW()', FALSE)
                 ->where('Status', 0)
@@ -913,7 +920,7 @@ class Stocktake extends CI_Model
     /** Updating tempsheet entry details  */
     public function updatedetail()
     {
-        $id = $this->input->post('action');
+        $id = (int)$this->input->post('action');
 
         $data['ItemLookupCode'] = $this->input->post('item_code');
         $data['Quantity'] = $this->input->post('quantity');
@@ -972,8 +979,8 @@ class Stocktake extends CI_Model
     /** Feeding stock take data */
     public function stock_take()
     {
-        $this->db->trans_start(); // Start transaction
-        $id = (int)$this->input->post('action'); // Typecast for security
+        $id = (int)$this->input->post('action');  // Typecast for security
+        // Prepare data array
         $data = [
             'ItemLookupCode' => $this->input->post('item_code', true),
             'Quantity' => (int)$this->input->post('quantity'),
@@ -983,64 +990,100 @@ class Stocktake extends CI_Model
             'Shelf' => strtoupper($this->input->post('bin', true)),
             'Reasoncode' => (int)$this->input->post('reasoncode')
         ];
-        // Ensure Shelf is valid
-        if (empty($data['Shelf']) || $data['Shelf'] === 'NULL' || $data['Shelf'] === '0') {
-            return 8; // Invalid bin/shelf
+
+        // Check if item exists in either item or alias tables
+        $this->db->select('ID');
+        $this->db->from('item');
+        $this->db->where('ItemLookupCode', $data['ItemLookupCode']);
+        $this->db->limit(1);
+        $itemQuery = $this->db->get();
+
+        // If no item exists, check in alias table
+        if ($itemQuery->num_rows() == 0) {
+            $this->db->select('ItemID');
+            $this->db->from('alias');
+            $this->db->where('Alias', $data['ItemLookupCode']);
+            $this->db->limit(1);
+            $aliasQuery = $this->db->get();
+
+            if ($aliasQuery->num_rows() == 0) {
+                return 3;  // Item doesn't exist in either table
+            }
         }
-        // Check if item exists in `item` or `alias` tables
-        $query = $this->db->query("select ID from item where ItemLookupCode = ? UNION select ItemID from alias where Alias = ? LIMIT 1",
-            [$data['ItemLookupCode'], $data['ItemLookupCode']]
-        );
-        if ($query->num_rows() === 0) {
-            return 3; // Item does not exist
-        }
+        // Handle existing record (update case)
         if ($id > 0) {
-            // Update existing tempsheets entry
             $this->db->where('ID', $id);
             $this->db->update('tempsheets', $data);
 
             if ($this->db->affected_rows() > 0) {
                 $this->tempsheet_update($id, $data['ItemLookupCode']);
-                $this->db->trans_complete(); // Commit transaction
-                return 2; // Successfully updated
+                return 2;  // Successfully updated.
             }
         } else {
-            // Check user's pending sheet count
-            $entries = $this->db->query("select COUNT(s.ID) AS entries from tempsheets s join stocktake t on t.ID = s.StocktakeID where s.UserID = ? and s.CashierName = ? and s.Status = 0 and t.Status = 0", [$data['UserID'], $data['CashierName']])->row()->entries ?? 0;
-
-            if ($entries >= 15) {
-                return 9; // Max sheet entries reached
+            // Check shelf validity
+            if (empty($data['Shelf']) || $data['Shelf'] == 'NULL' || $data['Shelf'] == '0') {
+                return 8;  // Invalid shelf
             }
-            // Check if item is already in pending sheets
-            $query1 = $this->db->get_where('tempsheets', ['ItemLookupCode' => $data['ItemLookupCode'],
-                'Shelf' => $data['Shelf'], 'Status' => 0, 'CashierName' => $data['CashierName']
-            ]);
 
-            if ($query1->num_rows() === 0) {
-                // Validate shelf assignment consistency
-                $query2 = $this->db->query("select s.Shelf as shelfname from tempsheets s join stocktake t on t.ID = s.StocktakeID where s.Status = 0 and t.Status = 0 and s.CashierName = ? LIMIT 1", [$data['CashierName']]);
+            // Check user’s pending sheet count
+            $this->db->select('COUNT(s.ID) as entries');
+            $this->db->from('tempsheets s');
+            $this->db->join('stocktake t', 't.ID = s.StocktakeID');
+            $this->db->where('s.UserID', $data['UserID']);
+            $this->db->where('s.CashierName', $data['CashierName']);
+            $this->db->where('s.Status', 0);
+            $this->db->where('t.Status', 0);
+            $entriesQuery = $this->db->get();
+            $entries = $entriesQuery->row()->entries;
 
-                $shelfname = $query2->row()->shelfname ?? null;
-                if ($shelfname === $data['Shelf'] || is_null($shelfname)) {
-                    // Insert new record into tempsheets
+            if ($entries >= 12) {
+                return 9;  // Max sheet entries reached
+            }
+            // Check if the item already exists in pending sheets
+            $this->db->select('ID');
+            $this->db->from('tempsheets');
+            $this->db->where('ItemLookupCode', $data['ItemLookupCode']);
+            $this->db->where('Shelf', $data['Shelf']);
+            $this->db->where('Status', 0);
+            $this->db->where('CashierName', $data['CashierName']);
+            $existingEntryQuery = $this->db->get();
+
+            if ($existingEntryQuery->num_rows() == 0) {
+                // Check if the user has already assigned a shelf
+                $this->db->select('Shelf as shelfname');
+                $this->db->from('tempsheets s');
+                $this->db->join('stocktake t', 't.ID = s.StocktakeID');
+                $this->db->where('s.Status', 0);
+                $this->db->where('t.Status', 0);
+                $this->db->where('s.CashierName', $data['CashierName']);
+                $this->db->limit(1);
+                $shelfQuery = $this->db->get();
+                $shelfname = $shelfQuery->row()->shelfname ?? null;
+                // Ensure shelf consistency
+                if ($shelfname == $data['Shelf'] || is_null($shelfname)) {
+                    // Insert into tempsheets
                     $this->db->insert('tempsheets', $data);
                     $id = $this->db->insert_id();
                     $this->update_stocksheets($id, $data['ItemLookupCode']);
-                    $this->db->trans_complete(); // Commit transaction
-                    return 1; // Successfully inserted
+                    return 1;  // Successfully inserted
                 } else {
-                    return 5; // Shelf mismatch error
+                    return 5;  // Shelf mismatch error.
                 }
             } else {
                 // Log repeated item code in tempduplicate table
-                $this->db->insert('tempduplicate', ['ItemLookupCode' => $data['ItemLookupCode'], 'Quantity' => $data['Quantity'], 'tTime' => $data['tTime'], 'UserID' => $data['UserID'], 'CashierName' => $data['CashierName']]);
-                return 4; // Duplicate item logged
+                $duplicateData = [
+                    'ItemLookupCode' => $data['ItemLookupCode'],
+                    'Quantity' => $data['Quantity'],
+                    'tTime' => $data['tTime'],
+                    'UserID' => $data['UserID'],
+                    'CashierName' => $data['CashierName']
+                ];
+                $this->db->insert('tempduplicate', $duplicateData);
+                return 4;  // Duplicate item logged
             }
         }
 
-        $this->db->trans_complete(); // Commit or rollback transaction
-        return $this->db->trans_status() ? true : false;
-
+        return false;  // If no valid operations were performed
     }
 
     /** Updating the existing SKU with the found quantities */
@@ -1194,7 +1237,7 @@ class Stocktake extends CI_Model
     // Show all the items that are pending synching.
     public function _syncstocksheets($search, $order_by, $order_dir, $LookupCode)
     {
-        $this->db->select("s.ID,s.Description,s.bin,s.Username,s.Quantity,a.`Alias`,i.`ItemLookupCode`,i.`Cost`,(s.Quantity*i.Cost) as costValue,i.`Price`,(i.`Price`*s.`Quantity`) as priceValue");
+        $this->db->select("s.ID,s.StocktakeID,s.Description,s.bin,s.Username,s.Quantity,a.`Alias`,i.`ItemLookupCode`,i.`Cost`,(s.Quantity*i.Cost) as costValue,i.`Price`,(i.`Price`*s.`Quantity`) as priceValue");
         $this->db->from('`stocksheets` s');
         $this->db->join('`item` i', 'i.`ID`=s.`ItemID`');
         $this->db->join('`alias` a', 'a.`ItemID`=s.`ItemID`', 'LEFT');
