@@ -1,12 +1,12 @@
 <!-- Main Footer -->
 <footer class="main-footer">
-    <!-- To the right -->
-    <div class="pull-right hidden-sm">
-    </div>
-    <!-- Default to the left -->
-    <strong> &copy; <?php echo date('Y'); ?> <a class="text-decoration-none" href="http://vortexsol.com" target="_blank">Vortex Solutions
-            Ltd</a>.</strong>
-    All rights reserved.
+	<!-- To the right -->
+	<div class="pull-right hidden-sm">
+	</div>
+	<!-- Default to the left -->
+	<strong> &copy; <?php echo date('Y'); ?> <a class="text-decoration-none" href="http://vortexsol.com" target="_blank">Vortex Solutions
+	                                                                                                                     Ltd</a>.</strong>
+	All rights reserved.
 </footer>
 </div><!-- ./wrapper -->
 <!-- Required js scripts -->
@@ -19,9 +19,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js" type="text/javascript"></script>
 <script src="<?php echo base_url() ?>assets/plugins/daterangepicker/daterangepicker.js" type="text/javascript"></script>
 <script src="<?php echo base_url() ?>assets/plugins/datepicker/bootstrap-datepicker.js" type="text/javascript"></script>
-<!-- DATA TABES SCRIPT -->
-<script src="<?php echo base_url() ?>assets/plugins/datatables/jquery.dataTables.min.js" type="text/javascript"></script>
-<script src="<?php echo base_url() ?>assets/plugins/datatables/dataTables.bootstrap.min.js" type="text/javascript"></script>
 <!-- iCheck 1.0.1 -->
 <script src="<?php echo base_url() ?>assets/plugins/iCheck/icheck.min.js" type="text/javascript"></script>
 <!-- fullCalendar 2.2.5 -->

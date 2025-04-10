@@ -40,7 +40,7 @@
 							</div>
 							<div class="col-6">
 								<div class="row">
-									<div class="col-5">
+									<div class="col-4">
 										<div class="col-md-12">
 											<form role="form" id="item-search" method="post">
 												<div class="row">
@@ -69,16 +69,15 @@
 							</div>
 							<div class="col-4">
 								<a class="btn btn-success float-end" href="<?php echo base_url('synchronize'); ?>"><i
-											class="fal fa-file-excel"></i>&nbsp; Export Excel</a>
+											class="fa-thin fa-file-xls"></i>&nbsp; Export Excel</a>
 								<a class="btn btn-danger float-end" style="margin-right: 5px;" target="_blank"
-								   href="<?php echo base_url('pdf'); ?>"><i class="fas fa-file-pdf"></i>&nbsp; Export
-								                                                                        PDF</a>
+								   href="<?php echo base_url('pdf'); ?>"><i class="fa-thin fa-file-pdf"></i>&nbsp; Export PDF</a>
 							</div>
 						</div><!-- /.box-header -->
 					</div>
 				</div>
 				<div class="box-body">
-					<table id="sheets" class="table table-bordered table-striped">
+					<table id="sheets" class="display">
 						<thead>
 						<tr>
 							<th>#</th>
@@ -92,7 +91,7 @@
 							<th class="text-end">Counted Qty</th>
 							<th class="text-end">Total Cost</th>
 							<th class="text-end">Total Price</th>
-							<th>Action</th>
+							<th class="text-end">Action</th>
 						</tr>
 						</thead>
 						<tbody>
@@ -119,7 +118,7 @@
 	<div class="modal-dialog modal-default">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h4 class="modal-title"><i class="fa-thin fa-clipboard"></i>&nbsp;Entry Details</h4>
+				<h4 class="modal-title"><i class="fa-thin fa-clipboard-list"></i>&nbsp; Entry Details</h4>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
@@ -173,7 +172,7 @@
 			</div>
 			<div class="modal-body">
 				<div class="col-md-12">
-					<table id="pending_details" class="table table-striped table-bordered table-condensed">
+					<table id="pending_details" class="display">
 						<thead>
 						<tr>
 							<th>#</th>
@@ -271,7 +270,7 @@
 						let deleteButton = `<a class="btn btn-sm btn-danger" href="<?php echo base_url() ?>del_sheet_entry/${data[0]}"><i class="far fa-trash"></i> Delete</a>`;
 						let blockedButton = `<button class="btn btn-sm btn-danger btn-edit disabled"><i class="fa-thin fa-ban"></i> Restricted</button>`;
 						return (userlevel == 5 || userlevel == 19) ? editButton + ' ' + deleteButton : blockedButton;
-					}
+					}, "className": "text-right"
 				}
 			],
 			"order": [[0, "asc"]], // Default sort by ID ascending

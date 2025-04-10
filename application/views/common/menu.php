@@ -17,11 +17,11 @@
 				<div class="collapse navbar-collapse" id="navbar-collapse">
 					<ul class="navbar-nav ms-auto">
 						<li class="nav-item active"><a class="nav-link" href="<?php echo base_url('dashboard'); ?>"><i
-										class="far fa-chart-network"></i>&nbsp;<span>Dashboard</span>
+										class="fa-thin fa-gauge-simple"></i>&nbsp;<span> Dashboard</span>
 							</a></li>
 						<?php if ($this->session->userdata('SecurityLevel') == 19 || $this->session->userdata('SecurityLevel') == 5) { ?>
 							<li class="nav-item"><a class="nav-link" href="<?php echo base_url('fstocks'); ?>"><i
-											class="fal fa-play-circle"></i><span>&nbsp;Freeze Stocks</span></a></li>
+											class="fa-thin fa-asterisk"></i><span>&nbsp; Freeze Stocks</span></a></li>
 						<?php } ?>
 						<?php if ($this->session->userdata('SecurityLevel') == 0 || $this->session->userdata('SecurityLevel') == 0) { ?>
 							<li class="nav-item dropdown">
@@ -35,21 +35,18 @@
 									<?php if ($this->session->userdata('SecurityLevel') == 19 || $this->session->userdata('SecurityLevel') == 5) { ?>
 										<li class="divider"></li>
 										<li><a class="dropdown-item" href="<?php echo base_url('departments'); ?>"><i
-														class="fas fa-folder"></i>&nbsp;
-										                                          Departments</a>
+														class="fas fa-folder"></i>&nbsp;Departments</a>
 										</li>
 										<li class="divider"></li>
 										<li><a class="dropdown-item" href="<?php echo base_url('items'); ?>"><i
 														class="fas fa-cubes"></i>&nbsp; Items</a></li>
 										<li class="divider"></li>
 										<li><a class="dropdown-item" href="<?php echo base_url('suppliers'); ?>"><i
-														class="fas fa-truck"></i>&nbsp;
-										                                         Suppliers</a>
+														class="fas fa-truck"></i>&nbsp; Suppliers</a>
 										</li>
 										<li class="divider"></li>
 										<li><a class="dropdown-item" href="<?php echo base_url('customers'); ?>"><i
-														class="fas fa-user-friends"></i>&nbsp;
-										                                                Customers</a></li>
+														class="fas fa-user-friends"></i>&nbsp;Customers</a></li>
 									<?php } ?>
 								</ul>
 							</li>
@@ -57,20 +54,18 @@
 						<?php if ($stocktakestatus == 1) { ?>
 							<li class="nav-item dropdown">
 								<a href="#" class="nav-link" role="button" id="navbarDropdown" data-bs-toggle="dropdown">
-									<i class="fal fa-desktop"></i>
-									<span>Stock Take <span class="caret"></span></span>
+									<i class="fa-thin fa-clipboard-list-check"></i><span>&nbsp; Stock Take <span
+												class="caret"></span></span>
 								</a>
 								<ul class="dropdown-menu" role="menu">
 									<li><a class="dropdown-item" href="<?php echo base_url('fsheets'); ?>"><i
-													class="fad fa-spinner"></i>&nbsp; Feed
-									                                           Sheets</a>
+													class="fad fa-spinner"></i>&nbsp; Feed Sheets</a>
 									</li>
 									<li>
 										<hr class="dropdown-divider">
 									</li>
 									<li><a class="dropdown-item" href="<?php echo base_url('import_sheets'); ?>"><i class="fas
-                                        fa-file-import"></i>&nbsp;
-									                        Import Sheets</a></li>
+                                        fa-file-import"></i>&nbsp;Import Sheets</a></li>
 								</ul>
 							</li>
 						<?php } ?>

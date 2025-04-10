@@ -92,10 +92,6 @@
 							<div class="mb-3">
 								<label>Shelf/Bin Number:</label>
 								<div class="input-group my-colorpicker2">
-									<!--                                    <input type="text" name="bin" id="bin" value="-->
-									<?php //echo $shelf; ?><!--"-->
-									<!--                                           autocomplete="off"-->
-									<!--                                           class="form-control" required/>-->
 									<select class="form-select" name="bin" id="bin" required>
 										<option value="" <?= !isset($shelf) ? 'selected' : '' ?>>Select Bin</option>
 										<option value="SHOP" <?= (isset($shelf) && $shelf == 'SHOP') ? 'selected' : '' ?>>
@@ -153,9 +149,6 @@
 							</div>
 						</form>
 					</div><!-- /.box-body -->
-					      <!-- <div class="modal-footer justify-content-between">
-                        <button onclick="location.href='<?php echo base_url(); ?>sync_stocks'" type="button" class="btn btn-success btn-flat" data-bs-dismiss="modal" style="float:left"><i class="fas fa-sync-alt"></i>&nbsp;Sync Sheets</button>
-                    </div> -->
 				</div><!-- /.box -->
 			</div><!-- /.col (left) -->
 			<div class="col-md-8">
@@ -170,16 +163,16 @@
 						</button>
 					</div>
 					<div class="box-body">
-						<table id="sheets" class="table table-bordered table-striped">
+						<table id="sheets" class="display">
 							<thead>
 							<tr>
 								<th>Bin/(Shelf)</th>
 								<th>Code</th>
 								<th>Description</th>
-								<th class="text-right">Couted</th>
-								<th class="text-right">Stock Date</th>
-								<th class="text-right">User</th>
-								<th class="text-right">Action</th>
+								<th class="text-end">Couted</th>
+								<th class="text-end">Stock Date</th>
+								<th class="text-end">User</th>
+								<th class="text-end">Action</th>
 							</tr>
 							</thead>
 							<tbody>
@@ -192,10 +185,10 @@
 											<td><?php echo $row->Shelf; ?></td>
 											<td><?php echo $row->ItemLookupCode; ?></td>
 											<td><?php echo $row->Itemdescription; ?></a></td>
-											<td class="text-right"><?php echo number_format($row->Quantity, 2); ?></td>
-											<td class="text-right"><?php echo $row->tTime; ?></td>
+											<td class="text-end"><?php echo number_format($row->Quantity, 2); ?></td>
+											<td class="text-end"><?php echo $row->tTime; ?></td>
 											<td><?php echo $row->CashierName; ?></a></td>
-											<td>
+											<td class="text-end">
 												<button class="btn btn-sm btn-warning btn-edit" id="<?php echo $row->ID; ?>"
 												        itemid="<?php echo $row->ItemID; ?>"
 												        itemcode="<?php echo $row->ItemLookupCode; ?>"
@@ -216,17 +209,6 @@
 								}
 							?>
 							</tbody>
-							<tfoot>
-							<tr>
-								<th>Bin/(Shelf)</th>
-								<th>Code</th>
-								<th>Description</th>
-								<th class="text-right">Couted</th>
-								<th class="text-right">Stock Date</th>
-								<th class="text-right">User</th>
-								<th class="text-right">Action</th>
-							</tr>
-							</tfoot>
 						</table>
 					
 					</div><!-- /.box-body -->
@@ -250,12 +232,12 @@
 				<h4 style="text-align:center">The item has already been entered in the current sheet.</h4><br/>
 			</div>
 			<div class="modal-footer">
-				<button onclick="location.href='<?php echo base_url(); ?>cancelcode'"
+				<button onclick="location.href='<?= base_url('cancelcode'); ?>'"
 				        class="btn btn-warning float-start"><i
 							class="far fa-times-circle"></i>&nbsp;&nbsp; Cancel
 				</button>
 				
-				<button class="btn btn-primary" onclick="location.href='<?php echo base_url(); ?>updatecode'"
+				<button class="btn btn-primary" onclick="location.href='<?= base_url("updatecode"); ?>'"
 				        type="button"><i
 							class="far fa-check-circle"></i>&nbsp; Add
 				</button>

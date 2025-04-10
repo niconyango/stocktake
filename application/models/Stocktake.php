@@ -928,6 +928,7 @@
 				'CountedDate' => date('Y-m-d H:i:s'),
 				'UserID' => (int)$this->session->userdata('ID'),
 				'Username' => ucwords($this->session->userdata('Name')),
+				'Synched' => 0,
 				'bin' => strtoupper($this->input->post('bin', true))
 			];
 			
@@ -1114,8 +1115,8 @@
 		public function updatecode()
 		{
 			$this->db->trans_start(); // Start transaction
-			// Securely update `tempsheets` quantities using JOIN
-			$this->db->query("update tempsheets s join tempduplicate d on d.ItemLookupCode = s.ItemLookupCode set s.Quantity = s.Quantity + d.Quantity,s.tTime = NOW() where s.UserID = d.UserID and s.CashierName = d.CashierName and s.Status = 0");
+			// Securely update `tempsheets` quantities when scanned twice.
+			$this->db->query("update tempsheets s join tempduplicate d on d.ItemLookupCode = s.ItemLookupCode set s.Quantity = (s.Quantity + d.Quantity),s.tTime = NOW() where s.UserID = d.UserID and s.CashierName = d.CashierName and s.Status = 0");
 			// Securely delete processed `tempduplicate` records
 			$this->db->where(['UserID' => $this->session->userdata('ID'), 'CashierName' => $this->session->userdata('Name')]);
 			$this->db->delete('tempduplicate');
@@ -1276,7 +1277,7 @@
 					->or_like('s.bin', $search)
 					->group_end();
 			}
-			
+			$this->db->group_by('s.ID');
 			// Define sortable columns (keys match controller $columns)
 			$sortable_columns = [
 				'ID' => 's.ID',

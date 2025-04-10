@@ -44,7 +44,7 @@
 				<!-- /.box-header -->
 				<div class="box-body">
 					<div class="table-responsive">
-						<table class="table table-bordered table-striped" id="display">
+						<table class="display" id="highcounts">
 							<thead>
 							<tr>
 								<th>Code</th>
@@ -63,7 +63,7 @@
 											<!-- <td><?php echo $i; ?></td> -->
 											<td><a><?php echo $row->ItemLookupCode; ?></a></td>
 											<td><?php echo $row->Itemdescription; ?></a></td>
-											<td class="text-end"><?php echo number_format($row->Quantity); ?></td>
+											<td class="text-end"><?php echo number_format($row->Quantity, 2); ?></td>
 											<td class="text-end"><?php echo number_format($row->Value, 2); ?></td>
 										</tr>
 										<?php
@@ -115,7 +115,7 @@
 <!-- /.content-wrapper -->
 <script type="application/javascript">
 	$(document).ready(function () {
-		$("#display").DataTable({});
+		$("#highcounts").DataTable({});
 	})
 	// Register the DataLabels Plugin
 	Chart.register(ChartDataLabels);
